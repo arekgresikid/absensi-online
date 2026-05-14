@@ -44,6 +44,11 @@ export default function Auth({ onSuccess }: AuthProps) {
           />
         </div>
 
+        <div style={{ marginTop: '24px', display: 'flex', gap: '16px', justifyContent: 'center' }}>
+          <a href="/privacy.html" style={{ color: 'var(--muted)', fontSize: '11px', textDecoration: 'none' }}>Privacy Policy</a>
+          <a href="/terms.html" style={{ color: 'var(--muted)', fontSize: '11px', textDecoration: 'none' }}>Terms of Service</a>
+        </div>
+
         <p style={{ marginTop: '32px', fontSize: '11px', color: 'var(--muted)', fontWeight: 600, opacity: 0.6 }}>
           v2.0 • Digital Presence System
         </p>
