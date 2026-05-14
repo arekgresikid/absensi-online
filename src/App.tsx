@@ -146,10 +146,8 @@ function App() {
 
       <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <img src="/logo.png" style={{ width: '32px', height: '32px', borderRadius: '8px' }} />
-            <h1 style={{ fontSize: '18px', fontWeight: 900 }}>Absensi Online</h1>
-          </div>
+          <img src="/logo.png" style={{ width: '32px', height: '32px', borderRadius: '8px' }} />
+          <h1 style={{ fontSize: '18px' }}>Absensi Online</h1>
         </div>
 
         <nav className="nav-group">
@@ -163,58 +161,73 @@ function App() {
 
         <div className="sidebar-footer">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-            {user.picture ? <img src={user.picture} style={{ width: '32px', height: '32px', borderRadius: '50%' }} /> : <UserIcon size={18}/>}
-            <div style={{ overflow: 'hidden' }}><p style={{ fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{user.name}</p></div>
+            {user.picture ? <img src={user.picture} style={{ width: '32px', height: '32px', borderRadius: '50%' }} /> : <UserIcon size={18} className="text-muted" />}
+            <div style={{ overflow: 'hidden' }}>
+              <p style={{ fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap', textOverflow: 'ellipsis', margin: 0 }}>{user.name}</p>
+              <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0 }}>{user.role.toUpperCase()}</p>
+            </div>
           </div>
-          <button onClick={handleLogout} className="nav-item" style={{ color: '#ef4444', padding: '10px 12px', border: '1px solid rgba(239, 68, 68, 0.2)' }}><LogOut size={16}/> Keluar</button>
+          <button onClick={handleLogout} className="btn btn-danger" style={{ width: '100%', fontSize: '13px' }}><LogOut size={16}/> Keluar</button>
         </div>
       </aside>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <header className="mobile-header">
-          <button onClick={() => setIsSidebarOpen(true)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><Menu size={24}/></button>
+          <button onClick={() => setIsSidebarOpen(true)} className="btn btn-outline" style={{ padding: '8px' }}><Menu size={24}/></button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div className="signal-dot" style={{ background: isWithinRange ? 'var(--safe)' : 'var(--danger)' }}></div>
-            <span style={{ fontWeight: 800, fontSize: '14px', letterSpacing: '0.5px' }}>{isWithinRange ? 'DI KANTOR' : 'LUAR KANTOR'}</span>
+            <div className="signal-dot" style={{ background: isWithinRange ? 'var(--safe)' : 'var(--danger)', width: '10px', height: '10px', borderRadius: '50%' }}></div>
+            <span style={{ fontWeight: 800, fontSize: '13px', letterSpacing: '0.5px' }}>{isWithinRange ? 'DI KANTOR' : 'LUAR KANTOR'}</span>
           </div>
-          <div style={{ width: '24px' }}></div>
+          <div style={{ width: '40px' }}></div>
         </header>
 
         <main className="main-content">
           <AnimatePresence mode="wait">
-            <motion.div key={activeTab} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div 
+              key={activeTab} 
+              initial={{ opacity: 0, y: 10 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
               {activeTab === 'dashboard' && (
                 <Dashboard 
                   user={user} 
                   attendanceStatus={logs.find(l => l.date === new Date().toDateString() && l.user_email === user.email) ? (logs.find(l => l.date === new Date().toDateString() && l.user_email === user.email).check_out ? 'checked_out' : 'checked_in') : 'not_started'} 
-                  onCheckIn={() => setActiveTab('scan')} onCheckOut={() => setActiveTab('scan')} 
-                  isWithinRange={isWithinRange} logs={logs.filter(l => l.user_email === user.email)} 
+                  onCheckIn={() => setActiveTab('scan')} 
+                  onCheckOut={() => setActiveTab('scan')} 
+                  isWithinRange={isWithinRange} 
+                  logs={logs.filter(l => l.user_email === user.email)} 
                 />
               )}
               {activeTab === 'map' && (
-                <div className="card">
-                  <h2 style={{ marginBottom: '24px', fontWeight: 900 }}>Radar Lokasi</h2>
+                <div className="glass-card">
+                  <h2 style={{ marginBottom: '24px' }}>Radar Lokasi</h2>
                   <PresenceMap onLocationUpdate={() => {}} officeLocation={OFFICE_LOCATION} geofenceRadius={GEOFENCE_RADIUS} />
                 </div>
               )}
-              {activeTab === 'scan' && <div style={{ maxWidth: '500px', margin: '0 auto' }}><QRScanner onScan={async (text) => {
-                if (text.includes('absensi') && isWithinRange) {
-                  const today = new Date().toDateString();
-                  const existing = logs.find(l => l.date === today && l.user_email === user.email);
-                  const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                  const logData = { id: existing ? existing.id : Math.random().toString(36).substr(2,9), user_email: user.email, user_name: user.name, date: today, check_in: existing ? existing.check_in : now, check_out: existing ? now : null, location: "Kantor" };
-                  await fetch('/api/attendance', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(logData) });
-                  fetchData();
-                  alert(existing ? 'Check-out berhasil!' : 'Check-in berhasil!');
-                  setActiveTab('dashboard');
-                } else alert('Di luar radius kantor atau QR Code salah!');
-              }} /></div>}
+              {activeTab === 'scan' && (
+                <div style={{ maxWidth: '500px', margin: '40px auto' }}>
+                  <QRScanner onScan={async (text) => {
+                    if (text.includes('absensi') && isWithinRange) {
+                      const today = new Date().toDateString();
+                      const existing = logs.find(l => l.date === today && l.user_email === user.email);
+                      const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                      const logData = { id: existing ? existing.id : Math.random().toString(36).substr(2,9), user_email: user.email, user_name: user.name, date: today, check_in: existing ? existing.check_in : now, check_out: existing ? now : null, location: "Kantor" };
+                      await fetch('/api/attendance', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(logData) });
+                      fetchData();
+                      alert(existing ? 'Check-out berhasil!' : 'Check-in berhasil!');
+                      setActiveTab('dashboard');
+                    } else alert('Di luar radius kantor atau QR Code salah!');
+                  }} />
+                </div>
+              )}
               {activeTab === 'admin' && user.role === 'admin' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                <div className="stack-v">
                   <div className="grid-2">
                     <QRGenerator />
-                    <div className="card">
-                      <h3 style={{ fontWeight: 900, marginBottom: '20px' }}>Tambah Karyawan</h3>
+                    <div className="glass-card">
+                      <h3 style={{ marginBottom: '24px' }}>Tambah Karyawan</h3>
                       <form onSubmit={async (e) => {
                         e.preventDefault();
                         const newUser: any = { email: newUserEmail, name: newUserName, role: 'karyawan' };
@@ -222,23 +235,41 @@ function App() {
                         setNewUserEmail(''); setNewUserName('');
                         fetchData();
                         alert("Berhasil!");
-                      }} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <input placeholder="Nama Lengkap" value={newUserName} onChange={(e) => setNewUserName(e.target.value)} required />
-                        <input type="email" placeholder="Email Google" value={newUserEmail} onChange={(e) => setNewUserEmail(e.target.value)} required />
-                        <button type="submit" className="btn btn-p" style={{ justifyContent: 'center' }}>Tambah</button>
+                      }} className="stack-v" style={{ gap: '16px' }}>
+                        <input className="form-input" placeholder="Nama Lengkap" value={newUserName} onChange={(e) => setNewUserName(e.target.value)} required />
+                        <input className="form-input" type="email" placeholder="Email Google" value={newUserEmail} onChange={(e) => setNewUserEmail(e.target.value)} required />
+                        <button type="submit" className="btn btn-p">Tambah Karyawan</button>
                       </form>
                     </div>
                   </div>
-                  <div className="card">
-                    <h3 style={{ fontWeight: 900, marginBottom: '20px' }}>Daftar Karyawan</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                      {allUsers.map(u => (
-                        <div key={u.email} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', borderBottom: '1px solid var(--border)' }}>
-                          <div><p style={{ fontWeight: 700, fontSize: '14px' }}>{u.name}</p><p style={{ fontSize: '11px', opacity: 0.6 }}>{u.email}</p></div>
-                          <select value={u.role} onChange={async (e) => {
-                            await fetch('/api/users', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: u.email, role: e.target.value }) });
-                            fetchData();
-                          }} style={{ width: '100px', padding: '4px' }}><option value="karyawan">Karyawan</option><option value="staff">Staff</option><option value="admin">Admin</option></select>
+                  <div className="glass-card">
+                    <h3 style={{ marginBottom: '24px' }}>Daftar Karyawan</h3>
+                    <div className="stack-v" style={{ gap: '0' }}>
+                      {allUsers.map((u, i) => (
+                        <div key={u.email} style={{ 
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          alignItems: 'center', 
+                          padding: '16px 0', 
+                          borderBottom: i === allUsers.length - 1 ? 'none' : '1px solid var(--border)' 
+                        }}>
+                          <div>
+                            <p style={{ fontWeight: 700, fontSize: '15px', margin: 0 }}>{u.name}</p>
+                            <p style={{ fontSize: '12px', color: 'var(--muted)', margin: 0 }}>{u.email}</p>
+                          </div>
+                          <select 
+                            className="form-input" 
+                            style={{ width: '120px', padding: '8px 12px' }}
+                            value={u.role} 
+                            onChange={async (e) => {
+                              await fetch('/api/users', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: u.email, role: e.target.value }) });
+                              fetchData();
+                            }}
+                          >
+                            <option value="karyawan">Karyawan</option>
+                            <option value="staff">Staff</option>
+                            <option value="admin">Admin</option>
+                          </select>
                         </div>
                       ))}
                     </div>

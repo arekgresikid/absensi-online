@@ -63,34 +63,40 @@ export default function QRScanner({ onScan }: QRScannerProps) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+    <div className="stack-v" style={{ gap: '24px' }}>
+      <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
         <div style={{ background: 'rgba(99,102,241,0.1)', padding: '16px', borderRadius: '20px', marginBottom: '24px' }}>
-          <Camera size={32} color="var(--p)" />
+          <Camera size={32} className="text-p" />
         </div>
         
-        <h3 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '8px' }}>Scan QR Kantor</h3>
-        <p style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '32px', maxWidth: '300px' }}>
+        <h3 style={{ fontSize: '24px', marginBottom: '8px' }}>Scan QR Kantor</h3>
+        <p className="text-muted" style={{ marginBottom: '32px', maxWidth: '300px' }}>
           Gunakan kamera atau upload gambar QR Code untuk melakukan absensi.
         </p>
 
-        <div style={{ width: '100%', position: 'relative', borderRadius: '24px', overflow: 'hidden', border: '2px solid rgba(99,102,241,0.2)', background: '#000', minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ 
+          width: '100%', 
+          position: 'relative', 
+          borderRadius: '24px', 
+          overflow: 'hidden', 
+          border: '1px solid var(--glass-border)', 
+          background: '#000', 
+          minHeight: '300px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
+        }}>
           <div id={cameraId} style={{ width: '100%' }}></div>
           {!isScanning && (
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', gap: '16px' }}>
-               <button onClick={startScanner} className="btn btn-p" style={{ width: '220px' }}>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.7)', gap: '16px', padding: '20px' }}>
+               <button onClick={startScanner} className="btn btn-p" style={{ width: '100%', maxWidth: '240px' }}>
                   <Camera size={20} /> Mulai Kamera
                </button>
                <button 
                  onClick={() => fileInputRef.current?.click()} 
-                 className="btn" 
-                 style={{ 
-                   width: '220px', 
-                   background: 'rgba(255,255,255,0.1)', 
-                   border: '1px solid rgba(255,255,255,0.2)',
-                   color: 'white',
-                   backdropFilter: 'none' // Ensure no performance hit
-                 }}
+                 className="btn btn-outline" 
+                 style={{ width: '100%', maxWidth: '240px', background: 'rgba(255,255,255,0.1)' }}
                >
                   <Upload size={20} /> Upload Gambar
                </button>
@@ -100,16 +106,16 @@ export default function QRScanner({ onScan }: QRScannerProps) {
         </div>
 
         {isScanning && (
-          <button onClick={stopScanner} className="btn" style={{ marginTop: '24px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', width: '100%' }}>
+          <button onClick={stopScanner} className="btn btn-danger" style={{ marginTop: '24px', width: '100%' }}>
             <StopCircle size={20} /> Berhenti Memindai
           </button>
         )}
 
-        {error && <p style={{ color: 'var(--danger)', fontSize: '12px', marginTop: '16px', fontWeight: 700 }}>{error}</p>}
+        {error && <p style={{ color: 'var(--danger)', fontSize: '13px', marginTop: '16px', fontWeight: 700 }}>{error}</p>}
 
-        <div style={{ marginTop: '32px', display: 'flex', gap: '12px', background: 'rgba(255,255,255,0.03)', padding: '20px', borderRadius: '20px', border: '1px solid var(--border)', textAlign: 'left' }}>
-          <AlertCircle size={20} color="var(--p)" style={{ flexShrink: 0 }} />
-          <p style={{ fontSize: '12px', color: 'var(--muted)', lineHeight: '1.6' }}>
+        <div style={{ marginTop: '32px', display: 'flex', gap: '12px', background: 'rgba(255,255,255,0.02)', padding: '20px', borderRadius: '20px', border: '1px solid var(--border)', textAlign: 'left' }}>
+          <AlertCircle size={20} className="text-p" style={{ flexShrink: 0 }} />
+          <p className="text-muted" style={{ fontSize: '12px', lineHeight: '1.6', margin: 0 }}>
             Pastikan gambar QR Code terlihat jelas dan Anda berada dalam radius kantor yang ditentukan.
           </p>
         </div>

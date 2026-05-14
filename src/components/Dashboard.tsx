@@ -28,46 +28,51 @@ export default function Dashboard({
   }, []);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+    <div className="stack-v" style={{ gap: '40px' }}>
       
       {/* Hero Section */}
-      <div className="card" style={{ padding: 'var(--hero-padding, 60px)', background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(23, 28, 38, 0.7) 100%)', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: 0, right: 0, opacity: 0.03, pointerEvents: 'none', transform: 'translate(20%, -20%)' }}>
+      <div className="glass-card" style={{ 
+        padding: 'var(--hero-padding, 60px)', 
+        background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(2, 6, 23, 0.8) 100%)', 
+        position: 'relative', 
+        overflow: 'hidden' 
+      }}>
+        <div style={{ position: 'absolute', top: 0, right: 0, opacity: 0.05, pointerEvents: 'none', transform: 'translate(20%, -20%)' }}>
           <Clock size={400} />
         </div>
         
-        <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '48px' }}>
+        <div style={{ position: 'relative', zIndex: 10 }} className="stack-v" style={{ gap: '48px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '32px' }}>
             <div>
-              <p style={{ color: 'var(--p)', fontWeight: 800, letterSpacing: '3px', fontSize: '12px', textTransform: 'uppercase', marginBottom: '16px' }}>{today}</p>
-              <h2 style={{ fontSize: 'var(--h-size, 48px)', fontWeight: 900, lineHeight: 1.1, maxWidth: '600px', marginBottom: '8px' }}>
-                Selamat Bekerja
+              <p className="badge badge-p" style={{ marginBottom: '16px' }}>{today}</p>
+              <h2 className="text-gradient" style={{ fontSize: 'var(--h-size, 48px)', lineHeight: 1.1, maxWidth: '600px' }}>
+                Selamat Bekerja, <br/> {user.name.split(' ')[0]}
               </h2>
-              <p style={{ color: 'var(--muted)', fontSize: '14px', fontWeight: 600 }}>Tetap semangat dan jaga kesehatan</p>
+              <p className="text-muted" style={{ fontWeight: 600, marginTop: '8px' }}>Tetap semangat dan jaga kesehatan hari ini.</p>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <p style={{ fontSize: 'var(--time-size, 64px)', fontWeight: 900, letterSpacing: '-3px', opacity: 0.9 }}>{format(time, 'HH:mm:ss')}</p>
-              <p style={{ fontSize: '12px', fontWeight: 800, color: 'var(--p)', letterSpacing: '2px', textTransform: 'uppercase' }}>Waktu Server</p>
+              <p style={{ fontSize: 'var(--time-size, 64px)', fontWeight: 900, letterSpacing: '-3px', opacity: 0.9, margin: 0 }}>{format(time, 'HH:mm:ss')}</p>
+              <p className="text-p" style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '2px', textTransform: 'uppercase', margin: 0 }}>Waktu Server</p>
             </div>
           </div>
           
-          <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-            <div className="card" style={{ padding: '16px 32px', marginBottom: 0, display: 'flex', alignItems: 'center', gap: '16px', border: isWithinRange ? '1px solid var(--safe)' : '1px solid var(--danger)' }}>
-              <Signal size={20} style={{ flexShrink: 0 }} color={isWithinRange ? 'var(--safe)' : 'var(--danger)'} />
-              <span style={{ fontWeight: 800, fontSize: '14px' }}>{isWithinRange ? 'Radius Sesuai' : 'Luar Jangkauan'}</span>
+          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+            <div className="btn btn-outline" style={{ border: isWithinRange ? '1px solid var(--safe)' : '1px solid var(--danger)', cursor: 'default' }}>
+              <Signal size={18} color={isWithinRange ? 'var(--safe)' : 'var(--danger)'} />
+              <span style={{ fontSize: '14px' }}>{isWithinRange ? 'Radius Sesuai' : 'Luar Jangkauan'}</span>
             </div>
-            <div className="card" style={{ padding: '16px 32px', marginBottom: 0, display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: attendanceStatus === 'not_started' ? 'var(--muted)' : 'var(--p)' }} />
-              <span style={{ fontWeight: 800, fontSize: '14px' }}>Status: {attendanceStatus === 'not_started' ? 'Belum Absen' : attendanceStatus === 'checked_in' ? 'Sudah Masuk' : 'Sudah Pulang'}</span>
+            <div className="btn btn-outline" style={{ cursor: 'default' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: attendanceStatus === 'not_started' ? 'var(--muted)' : 'var(--p)' }} />
+              <span style={{ fontSize: '14px' }}>Status: {attendanceStatus === 'not_started' ? 'Belum Absen' : attendanceStatus === 'checked_in' ? 'Sudah Masuk' : 'Sudah Pulang'}</span>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', marginTop: '16px' }}>
-            <button onClick={onCheckIn} disabled={attendanceStatus !== 'not_started' || !isWithinRange} className="btn btn-p" style={{ fontSize: '20px', padding: '20px 48px' }}>
-              Check In Sekarang <ArrowRight size={24} />
+          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+            <button onClick={onCheckIn} disabled={attendanceStatus !== 'not_started' || !isWithinRange} className="btn btn-p" style={{ fontSize: '18px', padding: '16px 40px' }}>
+              Check In Sekarang <ArrowRight size={20} />
             </button>
             {attendanceStatus === 'checked_in' && (
-              <button onClick={onCheckOut} disabled={!isWithinRange} className="btn card" style={{ fontSize: '20px', padding: '20px 48px', marginBottom: 0 }}>
+              <button onClick={onCheckOut} disabled={!isWithinRange} className="btn btn-outline" style={{ fontSize: '18px', padding: '16px 40px' }}>
                 Check Out
               </button>
             )}
@@ -77,24 +82,29 @@ export default function Dashboard({
 
       {/* Info Grid */}
       <div className="grid-2">
-        <div className="card" style={{ padding: 0 }}>
-          <div style={{ padding: '32px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <History size={24} color="var(--p)" />
-            <h3 style={{ fontWeight: 900 }}>Riwayat Absensi Pribadi</h3>
+        <div className="glass-card" style={{ padding: 0, overflow: 'hidden' }}>
+          <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '16px', background: 'rgba(255,255,255,0.02)' }}>
+            <History size={20} className="text-p" />
+            <h3 style={{ fontSize: '18px' }}>Riwayat Absensi</h3>
           </div>
-          <div style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {logs.length === 0 ? (
-              <p style={{ textAlign: 'center', padding: '40px', color: 'var(--muted)', fontStyle: 'italic' }}>Belum ada riwayat hari ini.</p>
+              <p className="text-muted" style={{ textAlign: 'center', padding: '40px', fontStyle: 'italic' }}>Belum ada riwayat hari ini.</p>
             ) : (
               logs.map((log) => (
-                <div key={log.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid var(--border)' }}>
+                <div key={log.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid var(--border)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <CheckCircle2 size={24} color="var(--safe)" />
-                    <div><p style={{ fontWeight: 800 }}>{log.date}</p><p className="badge badge-emp">Verified</p></div>
+                    <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '10px', borderRadius: '12px' }}>
+                      <CheckCircle2 size={20} color="var(--safe)" />
+                    </div>
+                    <div>
+                      <p style={{ fontWeight: 800, fontSize: '14px', margin: 0 }}>{log.date}</p>
+                      <span className="badge badge-p" style={{ fontSize: '9px', padding: '2px 8px' }}>Verified</span>
+                    </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <p style={{ fontSize: '24px', fontWeight: 900 }}>{log.checkIn}</p>
-                    <p style={{ fontSize: '12px', color: 'var(--muted)' }}>OUT: {log.checkOut || '--:--'}</p>
+                    <p style={{ fontSize: '20px', fontWeight: 900, margin: 0 }}>{log.check_in}</p>
+                    <p className="text-muted" style={{ fontSize: '11px', margin: 0 }}>OUT: {log.check_out || '--:--'}</p>
                   </div>
                 </div>
               ))
@@ -102,17 +112,20 @@ export default function Dashboard({
           </div>
         </div>
 
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <MapPin size={24} color="var(--p)" />
-            <h3 style={{ fontWeight: 900 }}>Informasi Kantor</h3>
+            <MapPin size={20} className="text-p" />
+            <h3 style={{ fontSize: '18px' }}>Informasi Kantor</h3>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div className="stack-v" style={{ gap: '20px' }}>
             <div>
-              <p style={{ fontWeight: 800, fontSize: '18px' }}>Gresik Office</p>
-              <p style={{ color: 'var(--muted)', fontSize: '14px' }}>Jalan Dr. Sutomo GG XIV, Gresik, Jawa Timur</p>
+              <p style={{ fontWeight: 800, fontSize: '16px', margin: 0 }}>Gresik Office</p>
+              <p className="text-muted" style={{ marginTop: '4px' }}>Jalan Dr. Sutomo GG XIV, Gresik, Jawa Timur</p>
             </div>
-            <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=600" style={{ width: '100%', height: '250px', objectFit: 'cover', borderRadius: '20px' }} alt="Office" />
+            <div style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', height: '200px' }}>
+              <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=600" style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Office" />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(3,7,18,0.6), transparent)' }} />
+            </div>
           </div>
         </div>
       </div>
