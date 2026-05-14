@@ -31,7 +31,7 @@ export default function Dashboard({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
       
       {/* Hero Section */}
-      <div className="card" style={{ padding: '60px', background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(23, 28, 38, 0.7) 100%)' }}>
+      <div className="card" style={{ padding: 'var(--hero-padding, 60px)', background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(23, 28, 38, 0.7) 100%)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 0, right: 0, opacity: 0.03, pointerEvents: 'none', transform: 'translate(20%, -20%)' }}>
           <Clock size={400} />
         </div>
@@ -40,20 +40,20 @@ export default function Dashboard({
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '32px' }}>
             <div>
               <p style={{ color: 'var(--p)', fontWeight: 800, letterSpacing: '3px', fontSize: '12px', textTransform: 'uppercase', marginBottom: '16px' }}>{today}</p>
-              <h2 style={{ fontSize: '48px', fontWeight: 900, lineHeight: 1.1, maxWidth: '600px', marginBottom: '8px' }}>
+              <h2 style={{ fontSize: 'var(--h-size, 48px)', fontWeight: 900, lineHeight: 1.1, maxWidth: '600px', marginBottom: '8px' }}>
                 Selamat Bekerja
               </h2>
               <p style={{ color: 'var(--muted)', fontSize: '14px', fontWeight: 600 }}>Tetap semangat dan jaga kesehatan</p>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <p style={{ fontSize: '64px', fontWeight: 900, letterSpacing: '-3px', opacity: 0.9 }}>{format(time, 'HH:mm:ss')}</p>
+              <p style={{ fontSize: 'var(--time-size, 64px)', fontWeight: 900, letterSpacing: '-3px', opacity: 0.9 }}>{format(time, 'HH:mm:ss')}</p>
               <p style={{ fontSize: '12px', fontWeight: 800, color: 'var(--p)', letterSpacing: '2px', textTransform: 'uppercase' }}>Waktu Server</p>
             </div>
           </div>
           
           <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-            <div className="card" style={{ padding: '16px 32px', marginBottom: 0, display: 'flex', alignItems: 'center', gap: '16px', border: isWithinRange ? '1px solid #10b981' : '1px solid var(--danger)' }}>
-              <Signal size={20} style={{ flexShrink: 0, minWidth: '20px' }} color={isWithinRange ? '#10b981' : 'var(--danger)'} />
+            <div className="card" style={{ padding: '16px 32px', marginBottom: 0, display: 'flex', alignItems: 'center', gap: '16px', border: isWithinRange ? '1px solid var(--safe)' : '1px solid var(--danger)' }}>
+              <Signal size={20} style={{ flexShrink: 0 }} color={isWithinRange ? 'var(--safe)' : 'var(--danger)'} />
               <span style={{ fontWeight: 800, fontSize: '14px' }}>{isWithinRange ? 'Radius Sesuai' : 'Luar Jangkauan'}</span>
             </div>
             <div className="card" style={{ padding: '16px 32px', marginBottom: 0, display: 'flex', alignItems: 'center', gap: '16px' }}>
