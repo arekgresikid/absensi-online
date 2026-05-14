@@ -84,6 +84,30 @@ export const onRequest: PagesFunction<{ DB: D1Database }> = async ({ request, en
       }
     }
 
+    // --- MANAJEMEN LOKASI KANTOR ---
+    if (path === '/api/locations') {
+      if (method === 'GET') {
+        const { results } = await env.DB.prepare('SELECT * FROM locations ORDER BY name ASC').all();
+        return Response.json(results);
+      }
+
+      if (method === 'POST') {
+        const { id, name, latitude, longitude } = await request.json() as any;
+        await env.DB.prepare('INSERT INTO locations (id, name, latitude, longitude) VALUES (?, ?, ?, ?)')
+          .bind(id, name, latitude, longitude)
+          .run();
+        return Response.json({ success: true });
+      }
+
+      if (method === 'DELETE') {
+        const { id } = await request.json() as any;
+        await env.DB.prepare('DELETE FROM locations WHERE id = ?')
+          .bind(id)
+          .run();
+        return Response.json({ success: true });
+      }
+    }
+
     return new Response('Not Found', { status: 404 });
   } catch (err: any) {
     return new Response(err.message, { status: 500 });

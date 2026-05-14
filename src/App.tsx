@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
-import { LayoutDashboard, MapPin, QrCode, User as UserIcon, ShieldCheck, LogOut, Menu } from 'lucide-react';
+import { LayoutDashboard, MapPin, QrCode, User as UserIcon, ShieldCheck, LogOut, Menu, FileText, History, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Auth from './components/Auth';
 import Dashboard from './components/Dashboard';
@@ -9,15 +9,6 @@ import PresenceMap from './components/PresenceMap';
 import QRScanner from './components/QRScanner';
 import QRGenerator from './components/QRGenerator';
 import LeaveRequest from './components/LeaveRequest';
-import { FileText, History } from 'lucide-react';
-
-const OFFICE_LOCATIONS = [
-  { name: "Jakarta", coords: [-6.175392, 106.827153] as [number, number] },
-  { name: "Bandung", coords: [-6.902481, 107.61881] as [number, number] },
-  { name: "Semarang", coords: [-6.9904, 110.4229] as [number, number] },
-  { name: "Yogyakarta", coords: [-7.7956, 110.3695] as [number, number] },
-  { name: "Surabaya", coords: [-7.2458, 112.7378] as [number, number] }
-];
 const GEOFENCE_RADIUS = 100;
 
 interface UserProfile {
@@ -42,11 +33,17 @@ function App() {
   const [currentOffice, setCurrentOffice] = useState<string | null>(null);
   const [logs, setLogs] = useState<any[]>([]);
   const [leaves, setLeaves] = useState<any[]>([]);
+  const [offices, setOffices] = useState<any[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Form states for new location
+  const [newLocName, setNewLocName] = useState('');
+  const [newLocLat, setNewLocLat] = useState('');
+  const [newLocLng, setNewLocLng] = useState('');
 
   // Global Location Tracking
   useEffect(() => {
-    if (!user) return;
+    if (!user || offices.length === 0) return;
 
     const watchId = navigator.geolocation.watchPosition(
       (pos) => {
@@ -54,10 +51,10 @@ function App() {
         const lng = pos.coords.longitude;
         let found = false;
 
-        for (const office of OFFICE_LOCATIONS) {
+        for (const office of offices) {
           const R = 6371e3;
-          const φ1 = lat * Math.PI / 180, φ2 = office.coords[0] * Math.PI / 180;
-          const Δφ = (office.coords[0] - lat) * Math.PI / 180, Δλ = (office.coords[1] - lng) * Math.PI / 180;
+          const φ1 = lat * Math.PI / 180, φ2 = office.latitude * Math.PI / 180;
+          const Δφ = (office.latitude - lat) * Math.PI / 180, Δλ = (office.longitude - lng) * Math.PI / 180;
           const a = Math.sin(Δφ/2)**2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2)**2;
           const d = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
           
@@ -75,21 +72,24 @@ function App() {
     );
 
     return () => navigator.geolocation.clearWatch(watchId);
-  }, [user]);
+  }, [user, offices]);
 
   const fetchData = async () => {
     try {
-      const [usersRes, logsRes, leavesRes] = await Promise.all([
+      const [usersRes, logsRes, leavesRes, locsRes] = await Promise.all([
         fetch('/api/users'),
         fetch('/api/attendance'),
-        fetch('/api/leaves')
+        fetch('/api/leaves'),
+        fetch('/api/locations')
       ]);
       const usersData = await usersRes.json();
       const logsData = await logsRes.json();
       const leavesData = await leavesRes.json();
+      const locsData = await locsRes.json();
       setAllUsers(usersData);
       setLogs(logsData);
       setLeaves(leavesData);
+      setOffices(locsData);
     } catch (err) {
       console.error("Fetch Error:", err);
     }
@@ -264,7 +264,7 @@ function App() {
               {activeTab === 'map' && (
                 <div className="glass-card">
                   <h2 style={{ marginBottom: '24px' }}>Radar Lokasi Kantor</h2>
-                  <PresenceMap onLocationUpdate={() => {}} officeLocations={OFFICE_LOCATIONS} geofenceRadius={GEOFENCE_RADIUS} />
+                  <PresenceMap onLocationUpdate={() => {}} officeLocations={offices.map(o => ({ name: o.name, coords: [o.latitude, o.longitude] }))} geofenceRadius={GEOFENCE_RADIUS} />
                 </div>
               )}
               {activeTab === 'scan' && (
@@ -370,6 +370,43 @@ function App() {
                             <option value="staff">Staff</option>
                             <option value="admin">Admin</option>
                           </select>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Feature: Location Management */}
+                  <div className="glass-card">
+                    <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <MapPin size={20} color="var(--p)" /> Manajemen Lokasi Kantor
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
+                      <input className="form-input" placeholder="Nama Lokasi (Cabang)" value={newLocName} onChange={e => setNewLocName(e.target.value)} />
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                        <input className="form-input" type="number" step="any" placeholder="Latitude" value={newLocLat} onChange={e => setNewLocLat(e.target.value)} />
+                        <input className="form-input" type="number" step="any" placeholder="Longitude" value={newLocLng} onChange={e => setNewLocLng(e.target.value)} />
+                      </div>
+                      <button className="btn btn-p" onClick={async () => {
+                        if (!newLocName || !newLocLat || !newLocLng) return alert('Lengkapi data!');
+                        const id = Math.random().toString(36).substr(2,9);
+                        await fetch('/api/locations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, name: newLocName, latitude: parseFloat(newLocLat), longitude: parseFloat(newLocLng) }) });
+                        setNewLocName(''); setNewLocLat(''); setNewLocLng('');
+                        fetchData();
+                      }}>Tambah Lokasi</button>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {offices.map(o => (
+                        <div key={o.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
+                          <div>
+                            <p style={{ fontWeight: 600, margin: 0 }}>{o.name}</p>
+                            <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0 }}>{o.latitude}, {o.longitude}</p>
+                          </div>
+                          <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)' }} onClick={async () => {
+                            if (confirm('Hapus lokasi ini?')) {
+                              await fetch('/api/locations', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: o.id }) });
+                              fetchData();
+                            }
+                          }}><Trash2 size={18} /></button>
                         </div>
                       ))}
                     </div>

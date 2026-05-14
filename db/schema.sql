@@ -33,3 +33,12 @@ CREATE TABLE IF NOT EXISTS leave_requests (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_email) REFERENCES users(email)
 );
+
+-- Tabel untuk daftar lokasi kantor cabang (Dynamic)
+CREATE TABLE IF NOT EXISTS locations (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    latitude REAL NOT NULL,
+    longitude REAL NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
