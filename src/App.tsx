@@ -59,7 +59,7 @@ function App() {
     let decoded: any;
     
     if (response.isCustomFlow) {
-      decoded = response.credential; // Profil sudah dalam bentuk objek
+      decoded = response.credential;
     } else {
       decoded = jwtDecode(response.credential);
     }
@@ -68,7 +68,6 @@ function App() {
     
     console.log("Login Attempt:", decoded.email, "Is Admin:", isSystemAdmin);
 
-    // Fetch latest whitelist from DB
     try {
       const usersRes = await fetch('/api/users');
       if (!usersRes.ok) throw new Error("Database connection error");
@@ -80,26 +79,29 @@ function App() {
         return;
       }
 
-    let userData: UserProfile;
-    if (existingUser) {
-      userData = { ...existingUser, picture: decoded.picture };
-    } else {
-      // First time Admin Login (Bootstrap)
-      userData = {
-        email: decoded.email,
-        name: decoded.name,
-        picture: decoded.picture,
-        role: 'admin', 
-        joinedAt: new Date().toISOString()
-      };
-      await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
-      });
-      fetchData();
+      let userData: UserProfile;
+      if (existingUser) {
+        userData = { ...existingUser, picture: decoded.picture };
+      } else {
+        userData = {
+          email: decoded.email,
+          name: decoded.name,
+          picture: decoded.picture,
+          role: 'admin', 
+          joinedAt: new Date().toISOString()
+        };
+        await fetch('/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(userData)
+        });
+        fetchData();
+      }
+      setUser(userData);
+    } catch (err) {
+      console.error("Login process error", err);
+      setLoginError("Terjadi kesalahan sistem. Silakan coba lagi nanti.");
     }
-    setUser(userData);
   };
 
   const updateUserRole = async (email: string, newRole: 'admin' | 'staff' | 'karyawan') => {
@@ -190,7 +192,7 @@ function App() {
   };
 
   if (!user) return (
-    <GoogleOAuthProvider clientId="105283516993-cd66qhdq6e0rfdaoa1rotdb6iut1d168.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <Auth onSuccess={handleLoginSuccess} error={loginError} />
     </GoogleOAuthProvider>
   );
