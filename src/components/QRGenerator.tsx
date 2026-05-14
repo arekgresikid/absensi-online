@@ -1,12 +1,11 @@
-import { QRCodeSVG } from 'qrcode.react';
+import { QRCodeCanvas } from 'qrcode.react';
 import { useState, useEffect } from 'react';
-import { QrCode, RefreshCcw } from 'lucide-react';
+import { QrCode, RefreshCcw, Download } from 'lucide-react';
 
 export default function QRGenerator() {
   const [token, setToken] = useState('');
 
   useEffect(() => {
-    // Generate a unique token for the day or session
     const newToken = `absensi-${new Date().toDateString()}-${Math.random().toString(36).substr(2, 9)}`;
     setToken(newToken);
   }, []);
@@ -14,6 +13,19 @@ export default function QRGenerator() {
   const refreshQRCode = () => {
     const newToken = `absensi-${new Date().toDateString()}-${Math.random().toString(36).substr(2, 9)}`;
     setToken(newToken);
+  };
+
+  const downloadQRCode = () => {
+    const canvas = document.getElementById('qr-gen-canvas') as HTMLCanvasElement;
+    if (canvas) {
+      const pngUrl = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+      const downloadLink = document.createElement('a');
+      downloadLink.href = pngUrl;
+      downloadLink.download = `QR-Absensi-${new Date().toISOString().split('T')[0]}.png`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    }
   };
 
   return (
@@ -24,16 +36,21 @@ export default function QRGenerator() {
       </div>
 
       <div style={{ background: 'white', padding: '24px', borderRadius: '24px', display: 'inline-block', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', marginBottom: '32px' }}>
-        {token && <QRCodeSVG value={token} size={200} level="H" includeMargin={true} />}
+        {token && <QRCodeCanvas id="qr-gen-canvas" value={token} size={256} level="H" includeMargin={true} />}
       </div>
 
       <p style={{ color: 'var(--muted)', fontSize: '13px', marginBottom: '32px', lineHeight: '1.6' }}>
-        Tampilkan kode ini di layar kantor atau cetak untuk dipindai oleh karyawan. Kode akan kedaluwarsa setiap hari.
+        Tampilkan kode ini di layar kantor atau cetak untuk dipindai oleh karyawan.
       </p>
 
-      <button onClick={refreshQRCode} className="btn btn-p" style={{ width: '100%' }}>
-        <RefreshCcw size={20} /> Perbarui Kode
-      </button>
+      <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
+        <button onClick={refreshQRCode} className="btn card" style={{ flex: 1, padding: '12px', justifyContent: 'center' }}>
+          <RefreshCcw size={20} /> Reset
+        </button>
+        <button onClick={downloadQRCode} className="btn btn-p" style={{ flex: 2, padding: '12px', justifyContent: 'center' }}>
+          <Download size={20} /> Download Gambar
+        </button>
+      </div>
     </div>
   );
 }

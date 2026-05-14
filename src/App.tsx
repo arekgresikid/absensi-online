@@ -173,9 +173,9 @@ function App() {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <header className="mobile-header">
           <button onClick={() => setIsSidebarOpen(true)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><Menu size={24}/></button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: isWithinRange ? 'var(--safe)' : 'var(--danger)' }}></div>
-            <span style={{ fontWeight: 800, fontSize: '14px' }}>{isWithinRange ? 'KANTOR' : 'LUAR KANTOR'}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div className="signal-dot" style={{ background: isWithinRange ? 'var(--safe)' : 'var(--danger)' }}></div>
+            <span style={{ fontWeight: 800, fontSize: '14px', letterSpacing: '0.5px' }}>{isWithinRange ? 'DI KANTOR' : 'LUAR KANTOR'}</span>
           </div>
           <div style={{ width: '24px' }}></div>
         </header>

@@ -40,10 +40,10 @@ export default function Dashboard({
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '32px' }}>
             <div>
               <p style={{ color: 'var(--p)', fontWeight: 800, letterSpacing: '3px', fontSize: '12px', textTransform: 'uppercase', marginBottom: '16px' }}>{today}</p>
-              <h2 style={{ fontSize: '48px', fontWeight: 900, lineHeight: 1.1, maxWidth: '600px' }}>
-                {attendanceStatus === 'not_started' ? 'Siap memulai hari produktif?' : 
-                 attendanceStatus === 'checked_in' ? 'Selamat bekerja, tetap semangat!' : 'Kerja bagus hari ini, sampai jumpa!'}
+              <h2 style={{ fontSize: '48px', fontWeight: 900, lineHeight: 1.1, maxWidth: '600px', marginBottom: '8px' }}>
+                Selamat Bekerja
               </h2>
+              <p style={{ color: 'var(--muted)', fontSize: '14px', fontWeight: 600 }}>Tetap semangat dan jaga kesehatan</p>
             </div>
             <div style={{ textAlign: 'right' }}>
               <p style={{ fontSize: '64px', fontWeight: 900, letterSpacing: '-3px', opacity: 0.9 }}>{format(time, 'HH:mm:ss')}</p>
