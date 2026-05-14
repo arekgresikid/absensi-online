@@ -11,7 +11,13 @@ import QRGenerator from './components/QRGenerator';
 import LeaveRequest from './components/LeaveRequest';
 import { FileText, History } from 'lucide-react';
 
-const OFFICE_LOCATION: [number, number] = [-7.162430, 112.641947];
+const OFFICE_LOCATIONS = [
+  { name: "Jakarta", coords: [-6.175392, 106.827153] as [number, number] },
+  { name: "Bandung", coords: [-6.902481, 107.61881] as [number, number] },
+  { name: "Semarang", coords: [-6.9904, 110.4229] as [number, number] },
+  { name: "Yogyakarta", coords: [-7.7956, 110.3695] as [number, number] },
+  { name: "Surabaya", coords: [-7.2458, 112.7378] as [number, number] }
+];
 const GEOFENCE_RADIUS = 100;
 
 interface UserProfile {
@@ -33,6 +39,7 @@ function App() {
   const [newUserName, setNewUserName] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isWithinRange, setIsWithinRange] = useState(false);
+  const [currentOffice, setCurrentOffice] = useState<string | null>(null);
   const [logs, setLogs] = useState<any[]>([]);
   const [leaves, setLeaves] = useState<any[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -45,14 +52,23 @@ function App() {
       (pos) => {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
+        let found = false;
 
-        const R = 6371e3;
-        const φ1 = lat * Math.PI / 180, φ2 = OFFICE_LOCATION[0] * Math.PI / 180;
-        const Δφ = (OFFICE_LOCATION[0] - lat) * Math.PI / 180, Δλ = (OFFICE_LOCATION[1] - lng) * Math.PI / 180;
-        const a = Math.sin(Δφ/2)**2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2)**2;
-        const d = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        
-        setIsWithinRange(d <= GEOFENCE_RADIUS);
+        for (const office of OFFICE_LOCATIONS) {
+          const R = 6371e3;
+          const φ1 = lat * Math.PI / 180, φ2 = office.coords[0] * Math.PI / 180;
+          const Δφ = (office.coords[0] - lat) * Math.PI / 180, Δλ = (office.coords[1] - lng) * Math.PI / 180;
+          const a = Math.sin(Δφ/2)**2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2)**2;
+          const d = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+          
+          if (d <= GEOFENCE_RADIUS) {
+            found = true;
+            setCurrentOffice(office.name);
+            break;
+          }
+        }
+        setIsWithinRange(found);
+        if (!found) setCurrentOffice(null);
       },
       (err) => console.error("GPS Error:", err),
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
@@ -247,8 +263,8 @@ function App() {
               )}
               {activeTab === 'map' && (
                 <div className="glass-card">
-                  <h2 style={{ marginBottom: '24px' }}>Radar Lokasi</h2>
-                  <PresenceMap onLocationUpdate={() => {}} officeLocation={OFFICE_LOCATION} geofenceRadius={GEOFENCE_RADIUS} />
+                  <h2 style={{ marginBottom: '24px' }}>Radar Lokasi Kantor</h2>
+                  <PresenceMap onLocationUpdate={() => {}} officeLocations={OFFICE_LOCATIONS} geofenceRadius={GEOFENCE_RADIUS} />
                 </div>
               )}
               {activeTab === 'scan' && (
@@ -265,12 +281,12 @@ function App() {
                         date: today, 
                         check_in: existing ? existing.check_in : now, 
                         check_out: existing ? now : null, 
-                        location: "Kantor",
+                        location: currentOffice || "Kantor",
                         photo: photo || null
                       };
                       await fetch('/api/attendance', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(logData) });
                       fetchData();
-                      alert(existing ? 'Check-out berhasil!' : 'Check-in berhasil!');
+                      alert(existing ? `Check-out berhasil dari ${currentOffice}!` : `Check-in berhasil di ${currentOffice}!`);
                       setActiveTab('dashboard');
                     } else alert('Di luar radius kantor atau QR Code salah!');
                   }} />

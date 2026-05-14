@@ -17,13 +17,13 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 interface PresenceMapProps {
   onLocationUpdate?: (lat: number, lng: number) => void;
-  officeLocation?: [number, number];
+  officeLocations?: { name: string, coords: [number, number] }[];
   geofenceRadius?: number; // in meters
 }
 
 export default function PresenceMap({ 
   onLocationUpdate, 
-  officeLocation = [-7.162430, 112.641947], 
+  officeLocations = [], 
   geofenceRadius = 100 
 }: PresenceMapProps) {
   const [position, setPosition] = useState<[number, number] | null>(null);
@@ -69,14 +69,18 @@ export default function PresenceMap({
           <Popup>Lokasi Anda Sekarang</Popup>
         </Marker>
         
-        <Marker position={officeLocation}>
-          <Popup>Titik Absensi (Kantor)</Popup>
-        </Marker>
-        <Circle 
-          center={officeLocation} 
-          radius={geofenceRadius} 
-          pathOptions={{ color: 'var(--p)', fillColor: 'var(--p)', fillOpacity: 0.2 }} 
-        />
+        {officeLocations.map((office, idx) => (
+          <div key={idx}>
+            <Marker position={office.coords}>
+              <Popup>Kantor Cabang: {office.name}</Popup>
+            </Marker>
+            <Circle 
+              center={office.coords} 
+              radius={geofenceRadius} 
+              pathOptions={{ color: 'var(--p)', fillColor: 'var(--p)', fillOpacity: 0.2 }} 
+            />
+          </div>
+        ))}
       </MapContainer>
     </div>
   );

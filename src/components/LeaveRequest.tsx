@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, FileText, Send, Clock } from 'lucide-react';
+import { FileText, Send, Clock } from 'lucide-react';
 
 interface LeaveRequestProps {
   user: any;
