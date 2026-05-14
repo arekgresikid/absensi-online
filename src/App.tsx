@@ -115,8 +115,8 @@ function App() {
     <div className="app-container">
       <aside className="sidebar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
-          <div style={{ background: 'var(--p)', padding: '10px', borderRadius: '12px' }}><ShieldCheck color="white" /></div>
-          <h2 style={{ fontWeight: 900, letterSpacing: '-1px' }}>PRSNSI</h2>
+          <img src="/logo.png" style={{ width: '32px', height: '32px', borderRadius: '8px' }} />
+          <h1 style={{ fontSize: '18px', fontWeight: 900, letterSpacing: '-0.5px' }}>Absensi Online</h1>
         </div>
         <nav style={{ flex: 1 }}>
           <button onClick={() => setActiveTab('dashboard')} className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}><LayoutDashboard size={20}/> Dashboard</button>
