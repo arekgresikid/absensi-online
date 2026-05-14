@@ -6,7 +6,7 @@ import Dashboard from './components/Dashboard';
 import PresenceMap from './components/PresenceMap';
 import QRScanner from './components/QRScanner';
 import QRGenerator from './components/QRGenerator';
-import { LogOut, LayoutDashboard, Map as MapIcon, QrCode, ShieldCheck, User as UserIcon, List, Search, Download, UserCheck, Key, Users as UsersIcon, Eye, EyeOff } from 'lucide-react';
+import { LogOut, LayoutDashboard, Map as MapIcon, QrCode, ShieldCheck, User as UserIcon, Key, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const OFFICE_LOCATION: [number, number] = [-7.162430, 112.641947]; 
