@@ -1,5 +1,5 @@
 import { GoogleLogin } from '@react-oauth/google';
-import { ShieldCheck, MapPin, QrCode, Smartphone, Clock } from 'lucide-react';
+import { ShieldCheck, MapPin, QrCode } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface AuthProps {
