@@ -102,32 +102,32 @@ body {
 }
 
 .sidebar-header {
-  padding: 32px 24px;
+  padding: 24px;
   flex-shrink: 0;
 }
 
 .nav-group {
-  padding: 0 16px;
+  padding: 0 12px;
   flex: 1;
-  overflow-y: auto; /* Memungkinkan scroll jika menu banyak */
+  overflow-y: auto;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 16px;
-  border-radius: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
   color: var(--muted);
   text-decoration: none;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   background: transparent;
   border: none;
   width: 100%;
   cursor: pointer;
   transition: 0.2s;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   text-align: left;
 }
 

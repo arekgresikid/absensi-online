@@ -52,8 +52,8 @@ export default function Dashboard({
           </div>
           
           <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-            <div className="card" style={{ padding: '16px 32px', marginBottom: 0, display: 'flex', alignItems: 'center', gap: '16px', border: isWithinRange ? '1px solid var(--success)' : '1px solid var(--danger)' }}>
-              <Signal size={20} color={isWithinRange ? 'var(--success)' : 'var(--danger)'} />
+            <div className="card" style={{ padding: '16px 32px', marginBottom: 0, display: 'flex', alignItems: 'center', gap: '16px', border: isWithinRange ? '1px solid #10b981' : '1px solid var(--danger)' }}>
+              <Signal size={20} style={{ flexShrink: 0, minWidth: '20px' }} color={isWithinRange ? '#10b981' : 'var(--danger)'} />
               <span style={{ fontWeight: 800, fontSize: '14px' }}>{isWithinRange ? 'Radius Sesuai' : 'Luar Jangkauan'}</span>
             </div>
             <div className="card" style={{ padding: '16px 32px', marginBottom: 0, display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -89,7 +89,7 @@ export default function Dashboard({
               logs.map((log) => (
                 <div key={log.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid var(--border)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <CheckCircle2 size={24} color="var(--success)" />
+                    <CheckCircle2 size={24} color="var(--safe)" />
                     <div><p style={{ fontWeight: 800 }}>{log.date}</p><p className="badge badge-emp">Verified</p></div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
