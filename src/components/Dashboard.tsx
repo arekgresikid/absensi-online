@@ -13,6 +13,7 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ 
+  user,
   attendanceStatus, 
   onCheckIn, 
   onCheckOut,
@@ -41,7 +42,7 @@ export default function Dashboard({
           <Clock size={400} />
         </div>
         
-        <div style={{ position: 'relative', zIndex: 10 }} className="stack-v" style={{ gap: '48px' }}>
+        <div className="stack-v" style={{ position: 'relative', zIndex: 10, gap: '48px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '32px' }}>
             <div>
               <p className="badge badge-p" style={{ marginBottom: '16px' }}>{today}</p>
