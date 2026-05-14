@@ -12,6 +12,7 @@
   --danger: #ef4444;
   --sidebar-bg: #020617;
   --radius: 20px;
+  --map-h: 500px;
   
   /* RESPONSIVE TOKENS */
   --hero-padding: 60px;
@@ -21,9 +22,19 @@
 
 @media (max-width: 768px) {
   :root {
-    --hero-padding: 32px 20px;
-    --h-size: 32px;
-    --time-size: 40px;
+    --hero-padding: 32px 16px;
+    --h-size: 28px;
+    --time-size: 44px;
+    --radius: 16px;
+    --map-h: 350px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --h-size: 24px;
+    --time-size: 36px;
+    --hero-padding: 24px 12px;
   }
 }
 
@@ -39,6 +50,7 @@ html, body {
   color: var(--text);
   font-family: 'Outfit', 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  word-break: break-word;
 }
 
 * {
@@ -207,9 +219,44 @@ h1, h2, h3, h4 { margin: 0; font-weight: 900; }
   box-shadow: 0 4px 15px rgba(99, 102, 241, 0.15);
 }
 
+/* Utilities */
+.hide-mobile { display: block; }
+@media (max-width: 768px) {
+  .hide-mobile { display: none !important; }
+}
+
+/* Sidebar Footer Adjustments */
 .sidebar-footer {
   padding: 24px;
   border-top: 1px solid var(--border);
+  margin-top: auto;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.user-info img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+}
+
+.user-details {
+  overflow: hidden;
+}
+
+.user-details p {
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Mobile Header */
@@ -239,11 +286,22 @@ h1, h2, h3, h4 { margin: 0; font-weight: 900; }
 /* Grid System */
 .grid-2 {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 20px;
 }
 
-.stack-v { display: flex; flexDirection: column; gap: 24px; }
+@media (max-width: 768px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.stack-v { display: flex; flex-direction: column; gap: 24px; width: 100%; }
+
+@media (max-width: 768px) {
+  .stack-v { gap: 16px; }
+}
 
 /* Badges */
 .badge {

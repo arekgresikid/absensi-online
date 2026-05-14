@@ -29,10 +29,10 @@ export default function Auth({ onSuccess, error }: AuthProps) {
   });
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh', color: 'white' }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100vh', color: 'white', overflowX: 'hidden' }}>
       {/* Hero Section */}
       <div style={{ 
-        padding: '80px 20px', 
+        padding: 'var(--hero-padding, 80px 20px)', 
         textAlign: 'center', 
         backgroundImage: 'radial-gradient(circle at 50% 0%, #1a1c2c 0%, transparent 70%)' 
       }}>
@@ -41,17 +41,17 @@ export default function Auth({ onSuccess, error }: AuthProps) {
           animate={{ opacity: 1, y: 0 }}
           style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}
         >
-          <img src="/logo.png" alt="PRSNSI Logo" style={{ width: '100px', height: '100px', borderRadius: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }} />
+          <img src="/logo.png" alt="PRSNSI Logo" style={{ width: 'min(100px, 20vw)', height: 'min(100px, 20vw)', borderRadius: '20px', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }} />
         </motion.div>
         
-        <h1 className="text-gradient" style={{ fontSize: '56px', marginBottom: '16px', letterSpacing: '-2px' }}>Absensi Online</h1>
-        <p className="text-muted" style={{ fontSize: '18px', maxWidth: '600px', margin: '0 auto 48px', lineHeight: '1.6' }}>
-          Platform presensi digital modern dengan verifikasi lokasi GPS dan keamanan tingkat tinggi untuk instansi Anda.
+        <h1 className="text-gradient" style={{ fontSize: 'var(--h-size, 48px)', marginBottom: '16px', letterSpacing: '-2px', lineHeight: 1.1 }}>Absensi Online</h1>
+        <p className="text-muted" style={{ fontSize: 'clamp(14px, 4vw, 18px)', maxWidth: '600px', margin: '0 auto 48px', lineHeight: '1.6' }}>
+          Platform presensi digital modern dengan verifikasi lokasi GPS dan keamanan tingkat tinggi.
         </p>
 
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '80px' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '60px' }}>
           <div className="glass-card" style={{ maxWidth: '400px', width: '100%', border: '1px solid var(--p)' }}>
-            <h2 style={{ fontSize: '20px', marginBottom: '32px' }}>Masuk ke Sistem</h2>
+            <h2 style={{ fontSize: '20px', marginBottom: '24px' }}>Masuk ke Sistem</h2>
             
             {error && (
               <motion.div 
@@ -84,51 +84,51 @@ export default function Auth({ onSuccess, error }: AuthProps) {
                 boxShadow: '0 10px 20px rgba(0,0,0,0.2)'
               }}
             >
-              <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="24" alt="G" />
-              Masuk dengan Google
+              <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="20" alt="G" />
+              <span style={{ fontWeight: 800 }}>Masuk dengan Google</span>
             </button>
 
-            <p style={{ marginTop: '24px', fontSize: '12px', color: 'var(--muted)' }}>
-              Selalu meminta pilihan akun untuk keamanan ekstra.
+            <p style={{ marginTop: '24px', fontSize: '11px', color: 'var(--muted)' }}>
+              Aman & Selalu Verifikasi Akun.
             </p>
           </div>
         </div>
       </div>
 
       {/* Info Section */}
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 24px 100px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '64px' }}>
-          <h2 style={{ fontSize: '32px' }}>Fitur Utama</h2>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 24px 80px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <h2 style={{ fontSize: 'var(--h-size, 32px)' }}>Fitur Utama</h2>
           <div style={{ width: '48px', height: '4px', background: 'var(--p)', margin: '16px auto', borderRadius: '2px' }}></div>
         </div>
 
         <div className="grid-2">
           <div className="glass-card">
-            <div className="text-p" style={{ marginBottom: '20px' }}><MapPin size={32}/></div>
+            <div className="text-p" style={{ marginBottom: '16px' }}><MapPin size={24}/></div>
             <h3 style={{ marginBottom: '12px', fontSize: '18px' }}>GPS Verifikasi</h3>
-            <p className="text-muted" style={{ lineHeight: '1.6' }}>Memastikan kehadiran hanya bisa dilakukan di area kantor yang ditentukan.</p>
+            <p className="text-muted" style={{ lineHeight: '1.6', margin: 0 }}>Memastikan kehadiran hanya dilakukan di area kantor.</p>
           </div>
           
           <div className="glass-card">
-            <div className="text-p" style={{ marginBottom: '20px' }}><QrCode size={32}/></div>
-            <h3 style={{ marginBottom: '12px', fontSize: '18px' }}>QR Code System</h3>
-            <p className="text-muted" style={{ lineHeight: '1.6' }}>Sistem scan yang cepat dan akurat untuk meminimalisir kecurangan.</p>
+            <div className="text-p" style={{ marginBottom: '16px' }}><QrCode size={24}/></div>
+            <h3 style={{ marginBottom: '12px', fontSize: '18px' }}>QR System</h3>
+            <p className="text-muted" style={{ lineHeight: '1.6', margin: 0 }}>Scan cepat untuk meminimalisir kecurangan absensi.</p>
           </div>
 
           <div className="glass-card">
-            <div className="text-p" style={{ marginBottom: '20px' }}><ShieldCheck size={32}/></div>
-            <h3 style={{ marginBottom: '12px', fontSize: '18px' }}>Data Terenkripsi</h3>
-            <p className="text-muted" style={{ lineHeight: '1.6' }}>Seluruh data absensi disimpan secara aman di Database Cloudflare D1.</p>
+            <div className="text-p" style={{ marginBottom: '16px' }}><ShieldCheck size={24}/></div>
+            <h3 style={{ marginBottom: '12px', fontSize: '18px' }}>Data Aman</h3>
+            <p className="text-muted" style={{ lineHeight: '1.6', margin: 0 }}>Data absensi disimpan aman di Database Cloudflare.</p>
           </div>
         </div>
 
-        <div style={{ marginTop: '100px', textAlign: 'center', borderTop: '1px solid var(--border)', paddingTop: '64px' }}>
-          <div style={{ display: 'flex', gap: '32px', justifyContent: 'center', marginBottom: '32px' }}>
-            <a href="/privacy/" className="text-muted" style={{ textDecoration: 'none', fontWeight: 600 }}>Privacy Policy</a>
-            <a href="/terms/" className="text-muted" style={{ textDecoration: 'none', fontWeight: 600 }}>Terms of Service</a>
+        <div style={{ marginTop: '80px', textAlign: 'center', borderTop: '1px solid var(--border)', paddingTop: '48px' }}>
+          <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginBottom: '24px', flexWrap: 'wrap' }}>
+            <a href="/privacy/" className="text-muted" style={{ textDecoration: 'none', fontWeight: 600 }}>Privacy</a>
+            <a href="/terms/" className="text-muted" style={{ textDecoration: 'none', fontWeight: 600 }}>Terms</a>
           </div>
-          <p style={{ fontSize: '13px', color: 'var(--muted)', opacity: 0.6 }}>
-            © 2024 Absensi Online - PRSNSI System.
+          <p style={{ fontSize: '12px', color: 'var(--muted)', opacity: 0.5 }}>
+            © 2024 PRSNSI System.
           </p>
         </div>
       </div>

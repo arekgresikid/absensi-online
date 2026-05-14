@@ -54,12 +54,12 @@ export default function PresenceMap({
   if (!position) return <div className="card" style={{ textAlign: 'center', padding: '60px' }}> <p style={{ fontWeight: 800 }}>Mencari Lokasi GPS...</p> </div>;
 
   return (
-    <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
+    <div className="glass-card" style={{ padding: '0', overflow: 'hidden' }}>
       <MapContainer 
         center={position} 
         zoom={16} 
         scrollWheelZoom={false}
-        style={{ height: '500px', width: '100%' }} // CRITICAL FIX: Height must be explicit
+        style={{ height: 'var(--map-h)', width: '100%' }} // CRITICAL FIX: Height must be explicit
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

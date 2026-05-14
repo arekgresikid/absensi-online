@@ -35,8 +35,8 @@ export default function QRGenerator() {
         <h3 style={{ fontSize: '18px' }}>QR Absensi Hari Ini</h3>
       </div>
 
-      <div style={{ background: 'white', padding: '24px', borderRadius: '24px', display: 'inline-block', boxShadow: '0 20px 40px rgba(0,0,0,0.4)', marginBottom: '32px' }}>
-        {token && <QRCodeCanvas id="qr-gen-canvas" value={token} size={220} level="H" includeMargin={true} />}
+      <div style={{ background: 'white', padding: '16px', borderRadius: '24px', display: 'inline-block', boxShadow: '0 20px 40px rgba(0,0,0,0.4)', marginBottom: '32px', maxWidth: '100%' }}>
+        {token && <QRCodeCanvas id="qr-gen-canvas" value={token} size={180} level="H" includeMargin={true} style={{ maxWidth: '100%', height: 'auto' }} />}
       </div>
 
       <p className="text-muted" style={{ marginBottom: '32px', lineHeight: '1.6', fontSize: '13px' }}>

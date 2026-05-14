@@ -160,11 +160,11 @@ function App() {
         </nav>
 
         <div className="sidebar-footer">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-            {user.picture ? <img src={user.picture} style={{ width: '32px', height: '32px', borderRadius: '50%' }} /> : <UserIcon size={18} className="text-muted" />}
-            <div style={{ overflow: 'hidden' }}>
-              <p style={{ fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap', textOverflow: 'ellipsis', margin: 0 }}>{user.name}</p>
-              <p style={{ fontSize: '11px', color: 'var(--muted)', margin: 0 }}>{user.role.toUpperCase()}</p>
+          <div className="user-info">
+            {user.picture ? <img src={user.picture} /> : <UserIcon size={18} className="text-muted" />}
+            <div className="user-details">
+              <p style={{ fontSize: '14px', fontWeight: 800 }}>{user.name}</p>
+              <p style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase' }}>{user.role}</p>
             </div>
           </div>
           <button onClick={handleLogout} className="btn btn-danger" style={{ width: '100%', fontSize: '13px' }}><LogOut size={16}/> Keluar</button>
@@ -207,7 +207,7 @@ function App() {
                 </div>
               )}
               {activeTab === 'scan' && (
-                <div style={{ maxWidth: '500px', margin: '40px auto' }}>
+                <div style={{ maxWidth: '500px', margin: '20px auto', width: '100%' }}>
                   <QRScanner onScan={async (text) => {
                     if (text.includes('absensi') && isWithinRange) {
                       const today = new Date().toDateString();
@@ -238,7 +238,7 @@ function App() {
                       }} className="stack-v" style={{ gap: '16px' }}>
                         <input className="form-input" placeholder="Nama Lengkap" value={newUserName} onChange={(e) => setNewUserName(e.target.value)} required />
                         <input className="form-input" type="email" placeholder="Email Google" value={newUserEmail} onChange={(e) => setNewUserEmail(e.target.value)} required />
-                        <button type="submit" className="btn btn-p">Tambah Karyawan</button>
+                        <button type="submit" className="btn btn-p" style={{ width: '100%' }}>Tambah Karyawan</button>
                       </form>
                     </div>
                   </div>

@@ -38,42 +38,42 @@ export default function Dashboard({
         position: 'relative', 
         overflow: 'hidden' 
       }}>
-        <div style={{ position: 'absolute', top: 0, right: 0, opacity: 0.05, pointerEvents: 'none', transform: 'translate(20%, -20%)' }}>
+        <div className="hide-mobile" style={{ position: 'absolute', top: 0, right: 0, opacity: 0.05, pointerEvents: 'none', transform: 'translate(20%, -20%)' }}>
           <Clock size={400} />
         </div>
         
-        <div className="stack-v" style={{ position: 'relative', zIndex: 10, gap: '48px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '32px' }}>
-            <div>
-              <p className="badge badge-p" style={{ marginBottom: '16px' }}>{today}</p>
-              <h2 className="text-gradient" style={{ fontSize: 'var(--h-size, 48px)', lineHeight: 1.1, maxWidth: '600px' }}>
+        <div className="stack-v" style={{ position: 'relative', zIndex: 10, gap: '32px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '24px' }}>
+            <div style={{ flex: '1 1 300px' }}>
+              <p className="badge badge-p" style={{ marginBottom: '12px' }}>{today}</p>
+              <h2 className="text-gradient" style={{ fontSize: 'var(--h-size, 48px)', lineHeight: 1.2, maxWidth: '100%' }}>
                 Selamat Bekerja, <br/> {user.name.split(' ')[0]}
               </h2>
-              <p className="text-muted" style={{ fontWeight: 600, marginTop: '8px' }}>Tetap semangat dan jaga kesehatan hari ini.</p>
+              <p className="text-muted" style={{ fontWeight: 600, marginTop: '8px' }}>Tetap semangat dan jaga kesehatan.</p>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <p style={{ fontSize: 'var(--time-size, 64px)', fontWeight: 900, letterSpacing: '-3px', opacity: 0.9, margin: 0 }}>{format(time, 'HH:mm:ss')}</p>
-              <p className="text-p" style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '2px', textTransform: 'uppercase', margin: 0 }}>Waktu Server</p>
+            <div style={{ flex: '0 0 auto', textAlign: 'left' }}>
+              <p style={{ fontSize: 'var(--time-size, 64px)', fontWeight: 900, letterSpacing: '-2px', opacity: 0.9, margin: 0, lineHeight: 1 }}>{format(time, 'HH:mm:ss')}</p>
+              <p className="text-p" style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '2px', textTransform: 'uppercase', margin: '4px 0 0 0' }}>Waktu Server</p>
             </div>
           </div>
           
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-            <div className="btn btn-outline" style={{ border: isWithinRange ? '1px solid var(--safe)' : '1px solid var(--danger)', cursor: 'default' }}>
-              <Signal size={18} color={isWithinRange ? 'var(--safe)' : 'var(--danger)'} />
-              <span style={{ fontSize: '14px' }}>{isWithinRange ? 'Radius Sesuai' : 'Luar Jangkauan'}</span>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <div className="btn btn-outline" style={{ border: isWithinRange ? '1px solid var(--safe)' : '1px solid var(--danger)', cursor: 'default', padding: '8px 16px', fontSize: '13px' }}>
+              <Signal size={16} color={isWithinRange ? 'var(--safe)' : 'var(--danger)'} />
+              <span>{isWithinRange ? 'Radius Sesuai' : 'Luar Jangkauan'}</span>
             </div>
-            <div className="btn btn-outline" style={{ cursor: 'default' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: attendanceStatus === 'not_started' ? 'var(--muted)' : 'var(--p)' }} />
-              <span style={{ fontSize: '14px' }}>Status: {attendanceStatus === 'not_started' ? 'Belum Absen' : attendanceStatus === 'checked_in' ? 'Sudah Masuk' : 'Sudah Pulang'}</span>
+            <div className="btn btn-outline" style={{ cursor: 'default', padding: '8px 16px', fontSize: '13px' }}>
+              <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: attendanceStatus === 'not_started' ? 'var(--muted)' : 'var(--p)' }} />
+              <span>{attendanceStatus === 'not_started' ? 'Belum Absen' : attendanceStatus === 'checked_in' ? 'Sudah Masuk' : 'Sudah Pulang'}</span>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-            <button onClick={onCheckIn} disabled={attendanceStatus !== 'not_started' || !isWithinRange} className="btn btn-p" style={{ fontSize: '18px', padding: '16px 40px' }}>
-              Check In Sekarang <ArrowRight size={20} />
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <button onClick={onCheckIn} disabled={attendanceStatus !== 'not_started' || !isWithinRange} className="btn btn-p" style={{ fontSize: '16px', padding: '14px 32px', flex: '1 1 auto' }}>
+              Check In <ArrowRight size={18} />
             </button>
             {attendanceStatus === 'checked_in' && (
-              <button onClick={onCheckOut} disabled={!isWithinRange} className="btn btn-outline" style={{ fontSize: '18px', padding: '16px 40px' }}>
+              <button onClick={onCheckOut} disabled={!isWithinRange} className="btn btn-outline" style={{ fontSize: '16px', padding: '14px 32px', flex: '1 1 auto' }}>
                 Check Out
               </button>
             )}
