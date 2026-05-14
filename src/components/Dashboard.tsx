@@ -81,35 +81,78 @@ export default function Dashboard({
         </div>
       </div>
 
-      {/* Info Grid */}
+      {/* Stats Section */}
       <div className="grid-2">
-        <div className="glass-card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '16px', background: 'rgba(255,255,255,0.02)' }}>
-            <History size={20} className="text-p" />
-            <h3 style={{ fontSize: '18px' }}>Riwayat Absensi</h3>
+        <div className="glass-card" style={{ padding: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ background: 'rgba(99,102,241,0.1)', padding: '12px', borderRadius: '16px' }}>
+              <CheckCircle2 className="text-p" size={24} />
+            </div>
+            <div>
+              <p className="text-muted" style={{ fontSize: '13px', margin: 0 }}>Hadir Minggu Ini</p>
+              <h3 style={{ fontSize: '28px', margin: 0 }}>{logs.filter(l => {
+                const logDate = new Date(l.date);
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                return logDate >= weekAgo;
+              }).length} <span style={{ fontSize: '14px', fontWeight: 400 }}>Hari</span></h3>
+            </div>
           </div>
-          <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {logs.length === 0 ? (
-              <p className="text-muted" style={{ textAlign: 'center', padding: '40px', fontStyle: 'italic' }}>Belum ada riwayat hari ini.</p>
-            ) : (
-              logs.map((log) => (
-                <div key={log.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid var(--border)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '10px', borderRadius: '12px' }}>
-                      <CheckCircle2 size={20} color="var(--safe)" />
-                    </div>
-                    <div>
-                      <p style={{ fontWeight: 800, fontSize: '14px', margin: 0 }}>{log.date}</p>
-                      <span className="badge badge-p" style={{ fontSize: '9px', padding: '2px 8px' }}>Verified</span>
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <p style={{ fontSize: '20px', fontWeight: 900, margin: 0 }}>{log.check_in}</p>
-                    <p className="text-muted" style={{ fontSize: '11px', margin: 0 }}>OUT: {log.check_out || '--:--'}</p>
-                  </div>
+        </div>
+
+        <div className="glass-card" style={{ padding: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ background: 'rgba(34,197,94,0.1)', padding: '12px', borderRadius: '16px' }}>
+              <History style={{ color: 'var(--safe)' }} size={24} />
+            </div>
+            <div>
+              <p className="text-muted" style={{ fontSize: '13px', margin: 0 }}>Total Jam Kerja</p>
+              <h3 style={{ fontSize: '28px', margin: 0 }}>
+                {Math.round(logs.reduce((acc, curr) => {
+                  if (curr.check_in && curr.check_out) {
+                    const [h1, m1] = curr.check_in.split(':').map(Number);
+                    const [h2, m2] = curr.check_out.split(':').map(Number);
+                    return acc + (h2 - h1) + (m2 - m1) / 60;
+                  }
+                  return acc;
+                }, 0))} <span style={{ fontSize: '14px', fontWeight: 400 }}>Jam</span>
+              </h3>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* History & Info */}
+      <div className="grid-2">
+        <div className="glass-card" style={{ padding: '0', overflow: 'hidden' }}>
+          <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ fontSize: '18px', margin: 0 }}>Riwayat Kehadiran</h3>
+            <span className="badge badge-p" style={{ fontSize: '10px' }}>{logs.length} Total</span>
+          </div>
+          <div className="stack-v" style={{ padding: '24px', gap: '12px', maxHeight: '400px', overflowY: 'auto' }}>
+            {logs.length === 0 && <p className="text-muted" style={{ textAlign: 'center', padding: '20px' }}>Belum ada riwayat.</p>}
+            {logs.map((log, i) => (
+              <div key={i} style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                padding: '16px', 
+                background: 'rgba(255,255,255,0.02)', 
+                borderRadius: '16px',
+                border: '1px solid var(--border)'
+              }}>
+                <div>
+                  <p style={{ fontWeight: 800, margin: 0, fontSize: '14px' }}>{log.date}</p>
+                  <p className="text-muted" style={{ fontSize: '11px', margin: 0 }}>{log.location}</p>
                 </div>
-              ))
-            )}
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ fontWeight: 900, margin: 0, fontSize: '16px' }}>{log.check_in} - {log.check_out || '--:--'}</p>
+                  <span className={`badge ${log.check_out ? 'badge-safe' : 'badge-p'}`} style={{ fontSize: '9px', padding: '2px 8px' }}>
+                    {log.check_out ? 'SELESAI' : 'AKTIF'}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -120,10 +163,10 @@ export default function Dashboard({
           </div>
           <div className="stack-v" style={{ gap: '20px' }}>
             <div>
-              <p style={{ fontWeight: 800, fontSize: '16px', margin: 0 }}>Gresik Office</p>
-              <p className="text-muted" style={{ marginTop: '4px' }}>Jalan Dr. Sutomo GG XIV, Gresik, Jawa Timur</p>
+              <p style={{ fontWeight: 800, fontSize: '16px', margin: 0 }}>Kantor Utama</p>
+              <p className="text-muted" style={{ marginTop: '4px', fontSize: '13px' }}>Jalan Dr. Sutomo GG XIV, Gresik, Jawa Timur</p>
             </div>
-            <div style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', height: '200px' }}>
+            <div style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', height: '180px' }}>
               <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=600" style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Office" />
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(3,7,18,0.6), transparent)' }} />
             </div>

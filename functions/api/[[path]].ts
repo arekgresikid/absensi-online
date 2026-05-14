@@ -40,7 +40,7 @@ export const onRequest: PagesFunction<{ DB: D1Database }> = async ({ request, en
       }
 
       if (method === 'POST') {
-        const { id, user_email, user_name, date, check_in, check_out, location } = await request.json() as any;
+        const { id, user_email, user_name, date, check_in, check_out, location, photo } = await request.json() as any;
         
         // Cek apakah sudah ada absen hari ini
         const existing = await env.DB.prepare('SELECT * FROM attendance WHERE user_email = ? AND date = ?')
@@ -48,14 +48,38 @@ export const onRequest: PagesFunction<{ DB: D1Database }> = async ({ request, en
           .first();
 
         if (!existing) {
-          await env.DB.prepare('INSERT INTO attendance (id, user_email, user_name, date, check_in, location) VALUES (?, ?, ?, ?, ?, ?)')
-            .bind(id, user_email, user_name, date, check_in, location)
+          await env.DB.prepare('INSERT INTO attendance (id, user_email, user_name, date, check_in, location, photo) VALUES (?, ?, ?, ?, ?, ?, ?)')
+            .bind(id, user_email, user_name, date, check_in, location, photo || null)
             .run();
         } else if (check_out) {
           await env.DB.prepare('UPDATE attendance SET check_out = ? WHERE user_email = ? AND date = ?')
             .bind(check_out, user_email, date)
             .run();
         }
+        return Response.json({ success: true });
+      }
+    }
+
+    // --- MANAJEMEN IZIN/CUTI ---
+    if (path === '/api/leaves') {
+      if (method === 'GET') {
+        const { results } = await env.DB.prepare('SELECT * FROM leave_requests ORDER BY created_at DESC').all();
+        return Response.json(results);
+      }
+
+      if (method === 'POST') {
+        const { id, user_email, user_name, type, start_date, end_date, reason } = await request.json() as any;
+        await env.DB.prepare('INSERT INTO leave_requests (id, user_email, user_name, type, start_date, end_date, reason) VALUES (?, ?, ?, ?, ?, ?, ?)')
+          .bind(id, user_email, user_name, type, start_date, end_date, reason)
+          .run();
+        return Response.json({ success: true });
+      }
+
+      if (method === 'PATCH') {
+        const { id, status } = await request.json() as any;
+        await env.DB.prepare('UPDATE leave_requests SET status = ? WHERE id = ?')
+          .bind(status, id)
+          .run();
         return Response.json({ success: true });
       }
     }

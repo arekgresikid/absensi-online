@@ -8,6 +8,8 @@ import Dashboard from './components/Dashboard';
 import PresenceMap from './components/PresenceMap';
 import QRScanner from './components/QRScanner';
 import QRGenerator from './components/QRGenerator';
+import LeaveRequest from './components/LeaveRequest';
+import { FileText, History } from 'lucide-react';
 
 const OFFICE_LOCATION: [number, number] = [-7.162430, 112.641947];
 const GEOFENCE_RADIUS = 100;
@@ -32,6 +34,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isWithinRange, setIsWithinRange] = useState(false);
   const [logs, setLogs] = useState<any[]>([]);
+  const [leaves, setLeaves] = useState<any[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Global Location Tracking
@@ -60,14 +63,17 @@ function App() {
 
   const fetchData = async () => {
     try {
-      const [usersRes, logsRes] = await Promise.all([
+      const [usersRes, logsRes, leavesRes] = await Promise.all([
         fetch('/api/users'),
-        fetch('/api/attendance')
+        fetch('/api/attendance'),
+        fetch('/api/leaves')
       ]);
       const usersData = await usersRes.json();
       const logsData = await logsRes.json();
+      const leavesData = await leavesRes.json();
       setAllUsers(usersData);
       setLogs(logsData);
+      setLeaves(leavesData);
     } catch (err) {
       console.error("Fetch Error:", err);
     }
@@ -77,10 +83,48 @@ function App() {
     if (user) {
       localStorage.setItem('prsnsi_user', JSON.stringify(user));
       fetchData();
+      
+      // Feature 4: Request Notification Permission
+      if (Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
     } else {
       localStorage.removeItem('prsnsi_user');
     }
   }, [user]);
+
+  // Feature 4: Auto-Reminder Check-out
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(() => {
+      const now = new Date();
+      if (now.getHours() === 17 && now.getMinutes() === 0) {
+        const today = new Date().toDateString();
+        const log = logs.find(l => l.date === today && l.user_email === user.email);
+        if (log && !log.check_out && Notification.permission === 'granted') {
+          new Notification("Jangan Lupa Check-out!", {
+            body: "Sudah jam pulang, pastikan Anda melakukan check-out presensi.",
+            icon: "/logo.png"
+          });
+        }
+      }
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [user, logs]);
+
+  const exportToCSV = () => {
+    if (logs.length === 0) return;
+    const headers = ['ID', 'Email', 'Nama', 'Tanggal', 'Masuk', 'Keluar', 'Lokasi'];
+    const rows = logs.map(l => [l.id, l.user_email, l.user_name, l.date, l.check_in, l.check_out || '-', l.location]);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].map(e => e.join(",")).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Laporan-Absensi-${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleLoginSuccess = async (response: any) => {
     setLoginError(null);
@@ -154,6 +198,7 @@ function App() {
           <button onClick={() => changeTab('dashboard')} className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}><LayoutDashboard size={18}/> Dashboard</button>
           <button onClick={() => changeTab('map')} className={`nav-item ${activeTab === 'map' ? 'active' : ''}`}><MapPin size={18}/> Lokasi Kantor</button>
           <button onClick={() => changeTab('scan')} className={`nav-item ${activeTab === 'scan' ? 'active' : ''}`}><QrCode size={18}/> Scan Absen</button>
+          <button onClick={() => changeTab('leave')} className={`nav-item ${activeTab === 'leave' ? 'active' : ''}`}><FileText size={18}/> Pengajuan Izin</button>
           {user.role === 'admin' && (
             <button onClick={() => changeTab('admin')} className={`nav-item ${activeTab === 'admin' ? 'active' : ''}`}><ShieldCheck size={18}/> Admin Panel</button>
           )}
@@ -208,12 +253,21 @@ function App() {
               )}
               {activeTab === 'scan' && (
                 <div style={{ maxWidth: '500px', margin: '20px auto', width: '100%' }}>
-                  <QRScanner onScan={async (text) => {
+                  <QRScanner onScan={async (text, photo) => {
                     if (text.includes('absensi') && isWithinRange) {
                       const today = new Date().toDateString();
                       const existing = logs.find(l => l.date === today && l.user_email === user.email);
                       const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                      const logData = { id: existing ? existing.id : Math.random().toString(36).substr(2,9), user_email: user.email, user_name: user.name, date: today, check_in: existing ? existing.check_in : now, check_out: existing ? now : null, location: "Kantor" };
+                      const logData = { 
+                        id: existing ? existing.id : Math.random().toString(36).substr(2,9), 
+                        user_email: user.email, 
+                        user_name: user.name, 
+                        date: today, 
+                        check_in: existing ? existing.check_in : now, 
+                        check_out: existing ? now : null, 
+                        location: "Kantor",
+                        photo: photo || null
+                      };
                       await fetch('/api/attendance', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(logData) });
                       fetchData();
                       alert(existing ? 'Check-out berhasil!' : 'Check-in berhasil!');
@@ -222,8 +276,18 @@ function App() {
                   }} />
                 </div>
               )}
+              {activeTab === 'leave' && (
+                <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                  <LeaveRequest user={user} onSuccess={fetchData} />
+                </div>
+              )}
               {activeTab === 'admin' && user.role === 'admin' && (
-                <div className="stack-v">
+                <div className="stack-v" style={{ gap: '32px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+                    <h2 style={{ fontSize: '32px' }}>Admin Panel</h2>
+                    <button onClick={exportToCSV} className="btn btn-outline"><History size={18}/> Ekspor Laporan (CSV)</button>
+                  </div>
+
                   <div className="grid-2">
                     <QRGenerator />
                     <div className="glass-card">
@@ -242,6 +306,26 @@ function App() {
                       </form>
                     </div>
                   </div>
+
+                  <div className="glass-card">
+                    <h3 style={{ marginBottom: '24px' }}>Persetujuan Izin / Cuti</h3>
+                    <div className="stack-v" style={{ gap: '12px' }}>
+                      {leaves.filter(l => l.status === 'pending').length === 0 && <p className="text-muted" style={{ textAlign: 'center', padding: '20px' }}>Tidak ada pengajuan pending.</p>}
+                      {leaves.filter(l => l.status === 'pending').map(l => (
+                        <div key={l.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', padding: '16px 20px', background: 'rgba(255,255,255,0.02)' }}>
+                          <div>
+                            <p style={{ fontWeight: 800, margin: 0 }}>{l.user_name} <span className="badge badge-p">{l.type}</span></p>
+                            <p className="text-muted" style={{ fontSize: '12px', marginTop: '4px' }}>{l.start_date} s/d {l.end_date} • "{l.reason}"</p>
+                          </div>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button onClick={async () => { await fetch('/api/leaves', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: l.id, status: 'approved' }) }); fetchData(); }} className="btn btn-p" style={{ padding: '8px 16px', fontSize: '12px' }}>Setuju</button>
+                            <button onClick={async () => { await fetch('/api/leaves', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: l.id, status: 'rejected' }) }); fetchData(); }} className="btn btn-danger" style={{ padding: '8px 16px', fontSize: '12px' }}>Tolak</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   <div className="glass-card">
                     <h3 style={{ marginBottom: '24px' }}>Daftar Karyawan</h3>
                     <div className="stack-v" style={{ gap: '0' }}>

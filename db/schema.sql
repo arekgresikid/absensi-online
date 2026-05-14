@@ -16,5 +16,20 @@ CREATE TABLE IF NOT EXISTS attendance (
     check_in TEXT NOT NULL,
     check_out TEXT,
     location TEXT,
+    photo TEXT, -- Base64 atau URL foto selfie
+    FOREIGN KEY (user_email) REFERENCES users(email)
+);
+
+-- Tabel untuk pengajuan izin/cuti
+CREATE TABLE IF NOT EXISTS leave_requests (
+    id TEXT PRIMARY KEY,
+    user_email TEXT NOT NULL,
+    user_name TEXT NOT NULL,
+    type TEXT NOT NULL, -- Sakit, Izin, Cuti
+    start_date TEXT NOT NULL,
+    end_date TEXT NOT NULL,
+    reason TEXT,
+    status TEXT DEFAULT 'pending', -- pending, approved, rejected
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_email) REFERENCES users(email)
 );

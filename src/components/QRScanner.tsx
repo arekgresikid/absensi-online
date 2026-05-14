@@ -3,7 +3,7 @@ import { Html5Qrcode } from 'html5-qrcode';
 import { Camera, AlertCircle, StopCircle, Upload } from 'lucide-react';
 
 interface QRScannerProps {
-  onScan: (decodedText: string) => void;
+  onScan: (decodedText: string, photo?: string) => void;
 }
 
 export default function QRScanner({ onScan }: QRScannerProps) {
@@ -22,15 +22,31 @@ export default function QRScanner({ onScan }: QRScannerProps) {
     };
   }, []);
 
+  const captureSelfie = (): string | undefined => {
+    const video = document.querySelector(`#${cameraId} video`) as HTMLVideoElement;
+    if (video) {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        return canvas.toDataURL('image/jpeg', 0.5); // Compresi ke JPEG 50%
+      }
+    }
+    return undefined;
+  };
+
   const startScanner = async () => {
     try {
       setError(null);
       if (qrRef.current) {
         await qrRef.current.start(
-          { facingMode: "environment" },
+          { facingMode: "user" }, // Gunakan kamera depan untuk selfie
           { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
           (decodedText) => {
-            onScan(decodedText);
+            const photo = captureSelfie();
+            onScan(decodedText, photo);
             stopScanner();
           },
           () => {}
