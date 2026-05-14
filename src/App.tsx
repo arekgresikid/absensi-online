@@ -190,7 +190,7 @@ function App() {
   };
 
   if (!user) return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+    <GoogleOAuthProvider clientId="105283516993-cd66qhdq6e0rfdaoa1rotdb6iut1d168.apps.googleusercontent.com">
       <Auth onSuccess={handleLoginSuccess} error={loginError} />
     </GoogleOAuthProvider>
   );
