@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
-import { LayoutDashboard, MapPin, QrCode, Key, Eye, EyeOff, User as UserIcon } from 'lucide-react';
+import { LayoutDashboard, MapPin, QrCode, Key, Eye, User as UserIcon, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Auth from './components/Auth';
 import Dashboard from './components/Dashboard';
