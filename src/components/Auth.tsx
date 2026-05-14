@@ -24,9 +24,11 @@ export default function Auth({ onSuccess }: AuthProps) {
         style={{ maxWidth: '400px', width: '100%', textAlign: 'center', padding: '40px 32px', marginBottom: 0 }}
       >
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
-          <div style={{ background: 'var(--p)', padding: '16px', borderRadius: '20px', boxShadow: '0 10px 20px var(--p-glow)' }}>
-            <ShieldCheck size={32} color="white" />
-          </div>
+          <img 
+            src="/logo.png" 
+            alt="PRSNSI Logo" 
+            style={{ width: '80px', height: '80px', borderRadius: '20px', boxShadow: '0 10px 20px rgba(0,0,0,0.3)' }} 
+          />
         </div>
 
         <h1 style={{ fontSize: '28px', fontWeight: 900, marginBottom: '8px', letterSpacing: '-1px' }}>PRSNSI</h1>
