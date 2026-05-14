@@ -191,11 +191,26 @@ function App() {
     } else alert('Di luar radius kantor atau QR Code salah!');
   };
 
-  if (!user) return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-      <Auth onSuccess={handleLoginSuccess} error={loginError} />
-    </GoogleOAuthProvider>
-  );
+  if (!user) {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    
+    if (!clientId) {
+      return (
+        <div style={{ background: '#1a1c2c', color: 'white', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', textAlign: 'center' }}>
+          <div className="card">
+            <h1 style={{ color: '#ef4444', marginBottom: '16px' }}>Konfigurasi Belum Lengkap</h1>
+            <p>VITE_GOOGLE_CLIENT_ID tidak ditemukan. Silakan tambahkan di Dashboard Cloudflare atau file .env.</p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <GoogleOAuthProvider clientId={clientId}>
+        <Auth onSuccess={handleLoginSuccess} error={loginError} />
+      </GoogleOAuthProvider>
+    );
+  }
 
   return (
     <div className="app-container">
