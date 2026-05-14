@@ -35,7 +35,7 @@ export default function Auth({ onSuccess }: AuthProps) {
               <GoogleLogin 
                 onSuccess={onSuccess} 
                 onError={() => console.log('Login Failed')}
-                theme="filled_black"
+                theme="outline"
                 shape="pill"
                 size="large"
               />
