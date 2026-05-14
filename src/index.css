@@ -116,8 +116,9 @@ html, body {
 }
 
 .nav-item.active {
-  background: var(--p);
+  background: linear-gradient(90deg, var(--p) 0%, rgba(99, 102, 241, 0.4) 100%);
   color: white;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
 }
 
 .sidebar-footer {
@@ -193,20 +194,4 @@ html, body {
   height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
-}
-
-.signal-dot::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  background: inherit;
-  opacity: 0.4;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 0.4; }
-  70% { transform: scale(2); opacity: 0; }
-  100% { transform: scale(1); opacity: 0; }
 }
