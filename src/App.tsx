@@ -89,6 +89,10 @@ function App() {
 
     try {
       const usersRes = await fetch('/api/users');
+      if (!usersRes.ok) {
+        setLoginError("Koneksi API Gagal (404/500). Pastikan dijalankan di Cloudflare atau Wrangler.");
+        return;
+      }
       const existingUsers = await usersRes.json();
       const existingUser = existingUsers.find((u: any) => u.email.toLowerCase() === decoded.email.toLowerCase());
 

@@ -1,15 +1,15 @@
 :root {
-  --p: #4f46e5;
-  --p-h: #4338ca;
-  --bg: #f8fafc;
-  --card: #ffffff;
-  --border: #e2e8f0;
-  --text: #0f172a;
-  --muted: #64748b;
+  --p: #6366f1;
+  --p-h: #4f46e5;
+  --bg: #0f172a;
+  --card: #1e293b;
+  --border: #334155;
+  --text: #f8fafc;
+  --muted: #94a3b8;
   --safe: #10b981;
   --danger: #ef4444;
-  --sidebar-bg: #1e293b;
-  --radius: 12px;
+  --sidebar-bg: #020617;
+  --radius: 16px;
 }
 
 * {
@@ -40,7 +40,7 @@ body {
 /* Header for Mobile */
 .mobile-header {
   display: none;
-  background: white;
+  background: #020617;
   padding: 16px 20px;
   border-bottom: 1px solid var(--border);
   align-items: center;
@@ -189,10 +189,11 @@ input, select {
   border-radius: 8px;
   font-size: 14px;
   outline: none;
-  background: #f1f5f9;
+  background: #0f172a;
+  color: white;
 }
 
 input:focus {
   border-color: var(--p);
-  background: white;
+  background: #1e293b;
 }
