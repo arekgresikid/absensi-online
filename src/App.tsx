@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import { LayoutDashboard, MapPin, QrCode, Key, Eye, User as UserIcon, ShieldCheck, LogOut, Menu, X } from 'lucide-react';
@@ -36,6 +36,34 @@ function App() {
   const [secretInput, setSecretInput] = useState('');
   const [showSecret, setShowSecret] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [currentCoords, setCurrentCoords] = useState<[number, number] | null>(null);
+
+  // Global Location Tracking
+  useEffect(() => {
+    if (!user) return;
+
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setCurrentCoords([lat, lng]);
+
+        // Calculate Distance
+        const R = 6371e3;
+        const φ1 = lat * Math.PI / 180, φ2 = OFFICE_LOCATION[0] * Math.PI / 180;
+        const Δφ = (OFFICE_LOCATION[0] - lat) * Math.PI / 180, Δλ = (OFFICE_LOCATION[1] - lng) * Math.PI / 180;
+        const a = Math.sin(Δφ/2)**2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2)**2;
+        const d = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        
+        setIsWithinRange(d <= GEOFENCE_RADIUS);
+        console.log(`GPS Update: ${d.toFixed(1)}m from office. Within range: ${d <= GEOFENCE_RADIUS}`);
+      },
+      (err) => console.error("Geolocation Error:", err),
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+    );
+
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, [user]);
 
   useEffect(() => {
     if (user) {
@@ -117,7 +145,6 @@ function App() {
 
   return (
     <div className="app-container">
-      {/* Overlay for mobile sidebar */}
       <div className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''}`} onClick={() => setIsSidebarOpen(false)}></div>
 
       <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
@@ -149,7 +176,10 @@ function App() {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <header className="mobile-header">
           <button onClick={() => setIsSidebarOpen(true)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><Menu size={24}/></button>
-          <span style={{ fontWeight: 800, fontSize: '16px' }}>{activeTab.toUpperCase()}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: isWithinRange ? 'var(--safe)' : 'var(--danger)' }}></div>
+            <span style={{ fontWeight: 800, fontSize: '14px' }}>{isWithinRange ? 'KANTOR' : 'LUAR KANTOR'}</span>
+          </div>
           <div style={{ width: '24px' }}></div>
         </header>
 
@@ -166,15 +196,8 @@ function App() {
               )}
               {activeTab === 'map' && (
                 <div className="card">
-                  <h2 style={{ marginBottom: '24px', fontWeight: 900 }}>Verifikasi Lokasi</h2>
-                  <PresenceMap onLocationUpdate={(lat, lng) => {
-                    const R = 6371e3;
-                    const φ1 = lat * Math.PI / 180, φ2 = OFFICE_LOCATION[0] * Math.PI / 180;
-                    const Δφ = (OFFICE_LOCATION[0] - lat) * Math.PI / 180, Δλ = (OFFICE_LOCATION[1] - lng) * Math.PI / 180;
-                    const a = Math.sin(Δφ/2)**2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2)**2;
-                    const d = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                    setIsWithinRange(d <= GEOFENCE_RADIUS);
-                  }} officeLocation={OFFICE_LOCATION} geofenceRadius={GEOFENCE_RADIUS} />
+                  <h2 style={{ marginBottom: '24px', fontWeight: 900 }}>Radar Lokasi (Radius 100m)</h2>
+                  <PresenceMap onLocationUpdate={() => {}} officeLocation={OFFICE_LOCATION} geofenceRadius={GEOFENCE_RADIUS} />
                 </div>
               )}
               {activeTab === 'scan' && <div style={{ maxWidth: '500px', margin: '0 auto' }}><QRScanner onScan={async (text) => {
@@ -194,23 +217,23 @@ function App() {
                   <div className="grid-2">
                     <QRGenerator />
                     <div className="card">
-                      <h3 style={{ fontWeight: 900, marginBottom: '20px' }}>Tambah Karyawan</h3>
+                      <h3 style={{ fontWeight: 900, marginBottom: '20px' }}>Daftarkan Karyawan</h3>
                       <form onSubmit={async (e) => {
                         e.preventDefault();
                         const newUser: any = { email: newUserEmail, name: newUserName, role: 'karyawan' };
                         await fetch('/api/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newUser) });
                         setNewUserEmail(''); setNewUserName('');
                         fetchData();
-                        alert("Berhasil didaftarkan!");
+                        alert("Berhasil!");
                       }} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         <input placeholder="Nama Lengkap" value={newUserName} onChange={(e) => setNewUserName(e.target.value)} required />
                         <input type="email" placeholder="Email Google" value={newUserEmail} onChange={(e) => setNewUserEmail(e.target.value)} required />
-                        <button type="submit" className="btn btn-p" style={{ justifyContent: 'center' }}>Daftarkan</button>
+                        <button type="submit" className="btn btn-p" style={{ justifyContent: 'center' }}>Tambah</button>
                       </form>
                     </div>
                   </div>
                   <div className="card">
-                    <h3 style={{ fontWeight: 900, marginBottom: '20px' }}>Daftar Karyawan</h3>
+                    <h3 style={{ fontWeight: 900, marginBottom: '20px' }}>Manajemen Karyawan</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       {allUsers.map(u => (
                         <div key={u.email} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', borderBottom: '1px solid var(--border)' }}>
