@@ -1,7 +1,6 @@
-name = "absensi-online"
-pages_build_output_dir = "./dist"
+pages_build_output_dir = "dist"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "absensi-db"
-database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" # Replace with your D1 database ID
+database_id = "2d222197-0a52-4b98-8699-994d037eb640"

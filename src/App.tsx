@@ -1,21 +1,22 @@
 import { useState, useEffect } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
+import { LayoutDashboard, MapPin, QrCode, Key, Eye, EyeOff, User as UserIcon } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Auth from './components/Auth';
 import Dashboard from './components/Dashboard';
 import PresenceMap from './components/PresenceMap';
 import QRScanner from './components/QRScanner';
 import QRGenerator from './components/QRGenerator';
-import { LogOut, LayoutDashboard, Map as MapIcon, QrCode, ShieldCheck, User as UserIcon, Key, Eye, EyeOff } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 
-const OFFICE_LOCATION: [number, number] = [-7.162430, 112.641947]; 
-const GEOFENCE_RADIUS = 100;
+// Konfigurasi Lokasi Kantor (Gang XIV Gresik)
+const OFFICE_LOCATION: [number, number] = [-7.162430, 112.641947];
+const GEOFENCE_RADIUS = 100; // 100 meter
 
 interface UserProfile {
   email: string;
   name: string;
-  picture?: string;
+  picture: string;
   role: 'admin' | 'staff' | 'karyawan';
   joinedAt: string;
 }
@@ -23,6 +24,9 @@ interface UserProfile {
 function App() {
   const [user, setUser] = useState<UserProfile | any>(null);
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserName, setNewUserName] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isWithinRange, setIsWithinRange] = useState(false);
   const [logs, setLogs] = useState<any[]>([]);
@@ -30,48 +34,70 @@ function App() {
   const [secretInput, setSecretInput] = useState('');
   const [showSecret, setShowSecret] = useState(false);
 
+  // Load Initial Data from API
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    const savedLogs = localStorage.getItem('attendance_logs');
-    const savedAllUsers = localStorage.getItem('registered_users');
-    if (savedUser) setUser(JSON.parse(savedUser));
-    if (savedLogs) setLogs(JSON.parse(savedLogs));
-    if (savedAllUsers) setAllUsers(JSON.parse(savedAllUsers));
-  }, []);
+    fetchData();
+  }, [user]);
 
-  useEffect(() => {
-    if (user) localStorage.setItem('user', JSON.stringify(user));
-    localStorage.setItem('attendance_logs', JSON.stringify(logs));
-    localStorage.setItem('registered_users', JSON.stringify(allUsers));
-  }, [user, logs, allUsers]);
+  const fetchData = async () => {
+    try {
+      const [usersRes, logsRes] = await Promise.all([
+        fetch('/api/users'),
+        fetch('/api/attendance')
+      ]);
+      const usersData = await usersRes.json();
+      const logsData = await logsRes.json();
+      setAllUsers(usersData);
+      setLogs(logsData);
+    } catch (err) {
+      console.error("Failed to fetch data", err);
+    }
+  };
 
-  const handleLoginSuccess = (response: any) => {
+  const handleLoginSuccess = async (response: any) => {
+    setLoginError(null);
     const decoded: any = jwtDecode(response.credential);
-    const existingUsers = JSON.parse(localStorage.getItem('registered_users') || '[]');
-    const existingUser = existingUsers.find((u: UserProfile) => u.email === decoded.email);
+    const isSystemAdmin = decoded.email === import.meta.env.VITE_ADMIN_EMAIL;
+    
+    // Refresh users from DB first to get latest whitelist
+    const usersRes = await fetch('/api/users');
+    const existingUsers = await usersRes.json();
+    const existingUser = existingUsers.find((u: any) => u.email === decoded.email);
+
+    if (!existingUser && !isSystemAdmin) {
+      setLoginError("Akses Ditolak! Email Anda tidak terdaftar dalam sistem. Silakan hubungi Admin.");
+      return;
+    }
 
     let userData: UserProfile;
     if (existingUser) {
       userData = { ...existingUser, picture: decoded.picture };
     } else {
-      // Check if this email is the one specified in .env as primary admin
-      const isSystemAdmin = decoded.email === import.meta.env.VITE_ADMIN_EMAIL;
-      
+      // First time Admin Login (Bootstrap)
       userData = {
         email: decoded.email,
         name: decoded.name,
         picture: decoded.picture,
-        role: isSystemAdmin ? 'admin' : 'karyawan', 
+        role: 'admin', 
         joinedAt: new Date().toISOString()
       };
-      setAllUsers([...existingUsers, userData]);
+      await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+      });
+      fetchData();
     }
     setUser(userData);
   };
 
-  const updateUserRole = (email: string, newRole: 'admin' | 'staff' | 'karyawan') => {
-    const updatedUsers = allUsers.map(u => u.email === email ? { ...u, role: newRole } : u);
-    setAllUsers(updatedUsers);
+  const updateUserRole = async (email: string, newRole: 'admin' | 'staff' | 'karyawan') => {
+    await fetch('/api/users', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, role: newRole })
+    });
+    fetchData();
     if (user.email === email) setUser({ ...user, role: newRole });
   };
 
@@ -79,7 +105,37 @@ function App() {
     if (secretInput === import.meta.env.VITE_ADMIN_SECRET) {
       updateUserRole(user.email, 'admin');
       setShowAdminPrompt(false);
-    } else alert('Salah!');
+      setSecretInput('');
+    } else {
+      alert("Kode rahasia salah!");
+    }
+  };
+
+  const handleAddUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUserEmail || !newUserName) return;
+    
+    if (allUsers.find(u => u.email === newUserEmail)) {
+      alert("Email sudah terdaftar!");
+      return;
+    }
+
+    const newUser: any = {
+      email: newUserEmail,
+      name: newUserName,
+      role: 'karyawan'
+    };
+
+    await fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newUser)
+    });
+    
+    setNewUserEmail('');
+    setNewUserName('');
+    fetchData();
+    alert("Karyawan berhasil didaftarkan!");
   };
 
   const handleLocationUpdate = (lat: number, lng: number) => {
@@ -91,25 +147,42 @@ function App() {
     setIsWithinRange(distance <= GEOFENCE_RADIUS);
   };
 
-  const handleQRScan = (text: string) => {
+  const handleQRScan = async (text: string) => {
     if (text.includes('absensi') && isWithinRange) {
       const today = new Date().toDateString();
-      if (logs.find(l => l.date === today && l.userEmail === user.email && l.checkOut)) return alert('Sudah!');
-      const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-      const existing = logs.find(l => l.date === today && l.userEmail === user.email);
+      const existing = logs.find(l => l.date === today && l.user_email === user.email);
       
-      if (!existing) {
-        setLogs([{ id: Math.random().toString(36).substr(2,9), userEmail: user.email, userName: user.name, date: today, checkIn: now, checkOut: null }, ...logs]);
-        alert('Check-in!');
-      } else {
-        setLogs(logs.map(l => l.id === existing.id ? { ...l, checkOut: now } : l));
-        alert('Check-out!');
-      }
+      if (existing && existing.check_out) return alert('Sudah absen pulang hari ini!');
+      
+      const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      
+      const logData = {
+        id: existing ? existing.id : Math.random().toString(36).substr(2,9),
+        user_email: user.email,
+        user_name: user.name,
+        date: today,
+        check_in: existing ? existing.check_in : now,
+        check_out: existing ? now : null,
+        location: "Kantor Gang XIV"
+      };
+
+      await fetch('/api/attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(logData)
+      });
+
+      fetchData();
+      alert(existing ? 'Check-out berhasil!' : 'Check-in berhasil!');
       setActiveTab('dashboard');
-    } else alert('Luar radius / QR Salah!');
+    } else alert('Di luar radius kantor atau QR Code salah!');
   };
 
-  if (!user) return <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}><Auth onSuccess={handleLoginSuccess} /></GoogleOAuthProvider>;
+  if (!user) return (
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <Auth onSuccess={handleLoginSuccess} error={loginError} />
+    </GoogleOAuthProvider>
+  );
 
   return (
     <div className="app-container">
@@ -120,46 +193,31 @@ function App() {
         </div>
         <nav style={{ flex: 1 }}>
           <button onClick={() => setActiveTab('dashboard')} className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}><LayoutDashboard size={20}/> Dashboard</button>
-          <button onClick={() => setActiveTab('map')} className={`nav-item ${activeTab === 'map' ? 'active' : ''}`}><MapIcon size={20}/> Lokasi</button>
-          <button onClick={() => setActiveTab('scan')} className={`nav-item ${activeTab === 'scan' ? 'active' : ''}`}><QrCode size={20}/> Scan QR</button>
-          {user.role === 'admin' && <button onClick={() => setActiveTab('admin')} className={`nav-item ${activeTab === 'admin' ? 'active' : ''}`}><ShieldCheck size={20}/> Admin Panel</button>}
+          <button onClick={() => setActiveTab('map')} className={`nav-item ${activeTab === 'map' ? 'active' : ''}`}><MapPin size={20}/> Lokasi</button>
+          <button onClick={() => setActiveTab('scan')} className="btn btn-p" style={{ width: '100%', marginTop: '20px', padding: '12px', justifyContent: 'center' }}><QrCode size={20}/> Scan Absen</button>
         </nav>
-        <button onClick={() => { setUser(null); localStorage.removeItem('user'); }} className="nav-item" style={{ color: 'var(--danger)' }}><LogOut size={20}/> Keluar</button>
+        
+        {user.role === 'admin' && (
+          <button onClick={() => setActiveTab('admin')} className={`nav-item ${activeTab === 'admin' ? 'active' : ''}`} style={{ marginTop: 'auto', marginBottom: '16px' }}><ShieldCheck size={20}/> Admin Panel</button>
+        )}
+
+        <div className="card" style={{ padding: '16px', background: 'rgba(255,255,255,0.03)', marginTop: user.role === 'admin' ? 0 : 'auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {user.picture ? (
+              <img src={user.picture} referrerPolicy="no-referrer" style={{ width: '36px', height: '36px', borderRadius: '10px' }} />
+            ) : (
+              <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--p)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><UserIcon size={18}/></div>
+            )}
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <p style={{ fontSize: '13px', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.name}</p>
+              <span style={{ fontSize: '9px', color: 'var(--p)', fontWeight: 700, textTransform: 'uppercase' }}>{user.role}</span>
+            </div>
+          </div>
+          <button onClick={() => window.location.reload()} style={{ width: '100%', marginTop: '12px', padding: '8px', fontSize: '11px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Keluar</button>
+        </div>
       </aside>
 
       <main className="main-content">
-        <div className="header">
-          <div><h1 style={{ fontSize: '32px', fontWeight: 900 }}>Halo, {user.name.split(' ')[0]}!</h1><p style={{ color: 'var(--muted)' }}>Gresik Digital Presence System.</p></div>
-          <div className="profile-chip">
-            {user.picture ? (
-              <img 
-                src={user.picture} 
-                className="profile-img" 
-                referrerPolicy="no-referrer"
-                onClick={() => user.role !== 'admin' && setShowAdminPrompt(true)}
-                alt="Profile"
-              />
-            ) : (
-              <div 
-                className="profile-img" 
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--p)', color: 'white' }}
-                onClick={() => user.role !== 'admin' && setShowAdminPrompt(true)}
-              >
-                <UserIcon size={24} />
-              </div>
-            )}
-            <div>
-              <p style={{ fontSize: '14px', fontWeight: 800 }}>{user.name}</p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: user.role === 'admin' ? 'var(--p)' : 'var(--success)' }} />
-                <span className={`badge badge-${user.role === 'admin' ? 'admin' : user.role === 'staff' ? 'staff' : 'emp'}`} style={{ fontSize: '9px', padding: '2px 8px' }}>
-                  {user.role}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <AnimatePresence mode="wait">
           {showAdminPrompt && (
             <div className="overlay">
@@ -174,12 +232,7 @@ function App() {
                     onKeyDown={(e) => e.key === 'Enter' && handleClaimAdmin()} 
                     style={{ marginBottom: '24px' }} 
                   />
-                  <button 
-                    onClick={() => setShowSecret(!showSecret)}
-                    style={{ position: 'absolute', right: '16px', top: '24px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)' }}
-                  >
-                    {showSecret ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
+                  <button onClick={() => setShowSecret(!showSecret)} style={{ position: 'absolute', right: '16px', top: '24px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)' }}><Eye size={20} /></button>
                 </div>
                 <div style={{ display: 'flex', gap: '16px' }}><button onClick={() => setShowAdminPrompt(false)} className="btn card" style={{ padding: '12px', flex: 1 }}>Batal</button><button onClick={handleClaimAdmin} className="btn btn-p" style={{ flex: 1 }}>Verifikasi</button></div>
               </div>
@@ -187,7 +240,16 @@ function App() {
           )}
 
           <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-            {activeTab === 'dashboard' && <Dashboard user={user} attendanceStatus={logs.find(l => l.date === new Date().toDateString() && l.userEmail === user.email) ? (logs.find(l => l.date === new Date().toDateString() && l.userEmail === user.email).checkOut ? 'checked_out' : 'checked_in') : 'not_started'} onCheckIn={() => setActiveTab('scan')} onCheckOut={() => setActiveTab('scan')} isWithinRange={isWithinRange} logs={logs.filter(l => l.userEmail === user.email)} />}
+            {activeTab === 'dashboard' && (
+              <Dashboard 
+                user={user} 
+                attendanceStatus={logs.find(l => l.date === new Date().toDateString() && l.user_email === user.email) ? (logs.find(l => l.date === new Date().toDateString() && l.user_email === user.email).check_out ? 'checked_out' : 'checked_in') : 'not_started'} 
+                onCheckIn={() => setActiveTab('scan')} 
+                onCheckOut={() => setActiveTab('scan')} 
+                isWithinRange={isWithinRange} 
+                logs={logs.filter(l => l.user_email === user.email)} 
+              />
+            )}
             {activeTab === 'map' && <div className="card"><h2 style={{ marginBottom: '24px', fontWeight: 900 }}>Verifikasi Lokasi Kantor</h2><PresenceMap onLocationUpdate={handleLocationUpdate} officeLocation={OFFICE_LOCATION} geofenceRadius={GEOFENCE_RADIUS} /></div>}
             {activeTab === 'scan' && <div style={{ maxWidth: '500px', margin: '0 auto' }}><QRScanner onScan={handleQRScan} /></div>}
             {activeTab === 'admin' && user.role === 'admin' && (
@@ -195,16 +257,20 @@ function App() {
                 <div className="grid-2">
                   <QRGenerator />
                   <div className="card" style={{ padding: 0 }}>
+                    <div style={{ padding: '24px', borderBottom: '1px solid var(--border)' }}>
+                      <h3 style={{ fontWeight: 900, marginBottom: '16px' }}>Daftarkan Karyawan Baru</h3>
+                      <form onSubmit={handleAddUser} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <input className="card" style={{ padding: '12px', background: 'var(--bg)', border: '1px solid var(--border)' }} placeholder="Nama Karyawan" value={newUserName} onChange={(e) => setNewUserName(e.target.value)} required />
+                        <input className="card" style={{ padding: '12px', background: 'var(--bg)', border: '1px solid var(--border)' }} type="email" placeholder="Email Google Karyawan" value={newUserEmail} onChange={(e) => setNewUserEmail(e.target.value)} required />
+                        <button type="submit" className="btn btn-p" style={{ padding: '12px' }}>Tambah Karyawan</button>
+                      </form>
+                    </div>
                     <div style={{ padding: '24px', borderBottom: '1px solid var(--border)' }}><h3 style={{ fontWeight: 900 }}>Manajemen User</h3></div>
                     <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '400px', overflowY: 'auto' }}>
                       {allUsers.map(u => (
                         <div key={u.email} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            {u.picture ? (
-                              <img src={u.picture} referrerPolicy="no-referrer" style={{ width: '32px', height: '32px', borderRadius: '8px' }} />
-                            ) : (
-                              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><UserIcon size={16}/></div>
-                            )}
+                            {u.picture ? <img src={u.picture} referrerPolicy="no-referrer" style={{ width: '32px', height: '32px', borderRadius: '8px' }} /> : <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><UserIcon size={16}/></div>}
                             <div><p style={{ fontSize: '14px', fontWeight: 700 }}>{u.name}</p><p style={{ fontSize: '10px', color: 'var(--muted)' }}>{u.email}</p></div>
                           </div>
                           <select value={u.role} onChange={(e) => updateUserRole(u.email, e.target.value as any)} style={{ fontSize: '10px', background: 'var(--bg)', color: 'white', border: '1px solid var(--border)', padding: '4px' }}><option value="karyawan">Karyawan</option><option value="staff">Staff</option><option value="admin">Admin</option></select>
@@ -218,8 +284,8 @@ function App() {
                   <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '400px', overflowY: 'auto' }}>
                     {logs.map(log => (
                       <div key={log.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '16px', borderBottom: '1px solid var(--border)' }}>
-                        <div><p style={{ fontWeight: 700 }}>{log.userName}</p><p style={{ fontSize: '10px', color: 'var(--muted)' }}>{log.date}</p></div>
-                        <div style={{ display: 'flex', gap: '12px' }}><span style={{ color: 'var(--p)', fontWeight: 800 }}>IN: {log.checkIn}</span><span style={{ color: 'var(--muted)', fontWeight: 800 }}>OUT: {log.checkOut || '--:--'}</span></div>
+                        <div><p style={{ fontWeight: 700 }}>{log.user_name}</p><p style={{ fontSize: '10px', color: 'var(--muted)' }}>{log.date}</p></div>
+                        <div style={{ display: 'flex', gap: '12px' }}><span style={{ color: 'var(--p)', fontWeight: 800 }}>IN: {log.check_in}</span><span style={{ color: 'var(--muted)', fontWeight: 800 }}>OUT: {log.check_out || '--:--'}</span></div>
                       </div>
                     ))}
                   </div>

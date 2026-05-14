@@ -4,9 +4,10 @@ import { motion } from 'framer-motion';
 
 interface AuthProps {
   onSuccess: (response: any) => void;
+  error?: string | null;
 }
 
-export default function Auth({ onSuccess }: AuthProps) {
+export default function Auth({ onSuccess, error }: AuthProps) {
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', color: 'white' }}>
       {/* Hero Section */}
@@ -31,6 +32,26 @@ export default function Auth({ onSuccess }: AuthProps) {
         <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '60px' }}>
           <div className="card" style={{ padding: '24px', maxWidth: '400px', width: '100%', border: '1px solid var(--p)' }}>
             <h2 style={{ fontSize: '20px', marginBottom: '24px', fontWeight: 800 }}>Masuk ke Sistem</h2>
+            
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                style={{ 
+                  background: 'rgba(239, 68, 68, 0.1)', 
+                  border: '1px solid #ef4444', 
+                  color: '#ef4444', 
+                  padding: '12px', 
+                  borderRadius: '12px', 
+                  marginBottom: '20px',
+                  fontSize: '13px',
+                  fontWeight: 600
+                }}
+              >
+                {error}
+              </motion.div>
+            )}
+
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <GoogleLogin 
                 onSuccess={onSuccess} 
