@@ -56,7 +56,14 @@ function App() {
 
   const handleLoginSuccess = async (response: any) => {
     setLoginError(null);
-    const decoded: any = jwtDecode(response.credential);
+    let decoded: any;
+    
+    if (response.isCustomFlow) {
+      decoded = response.credential; // Profil sudah dalam bentuk objek
+    } else {
+      decoded = jwtDecode(response.credential);
+    }
+
     const isSystemAdmin = decoded.email.toLowerCase() === import.meta.env.VITE_ADMIN_EMAIL.toLowerCase();
     
     console.log("Login Attempt:", decoded.email, "Is Admin:", isSystemAdmin);

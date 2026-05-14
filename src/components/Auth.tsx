@@ -1,4 +1,4 @@
-import { GoogleLogin } from '@react-oauth/google';
+import { useGoogleLogin } from '@react-oauth/google';
 import { ShieldCheck, MapPin, QrCode } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -8,6 +8,26 @@ interface AuthProps {
 }
 
 export default function Auth({ onSuccess, error }: AuthProps) {
+  const login = useGoogleLogin({
+    onSuccess: (tokenResponse) => {
+      // Kita perlu mengambil data user menggunakan access_token karena useGoogleLogin
+      // memberikan token akses, bukan ID Token (JWT) secara langsung.
+      fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+      })
+      .then(res => res.json())
+      .then(profile => {
+        // Kita kirim profil ini ke handleLoginSuccess di App.tsx
+        onSuccess({ 
+          credential: profile, // Kita kirim profile langsung
+          isCustomFlow: true 
+        });
+      });
+    },
+    onError: () => console.log('Login Failed'),
+    prompt: 'select_account', // INI KUNCINYA: Memaksa muncul pilihan email
+  });
+
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', color: 'white' }}>
       {/* Hero Section */}
@@ -30,8 +50,8 @@ export default function Auth({ onSuccess, error }: AuthProps) {
         </p>
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '60px' }}>
-          <div className="card" style={{ padding: '24px', maxWidth: '400px', width: '100%', border: '1px solid var(--p)' }}>
-            <h2 style={{ fontSize: '20px', marginBottom: '24px', fontWeight: 800 }}>Masuk ke Sistem</h2>
+          <div className="card" style={{ padding: '40px 32px', maxWidth: '400px', width: '100%', border: '1px solid var(--p)' }}>
+            <h2 style={{ fontSize: '20px', marginBottom: '32px', fontWeight: 800 }}>Masuk ke Sistem</h2>
             
             {error && (
               <motion.div 
@@ -52,17 +72,34 @@ export default function Auth({ onSuccess, error }: AuthProps) {
               </motion.div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <GoogleLogin 
-                onSuccess={onSuccess} 
-                onError={() => console.log('Login Failed')}
-                theme="outline"
-                shape="pill"
-                size="large"
-              />
-            </div>
-            <p style={{ marginTop: '20px', fontSize: '12px', color: 'var(--muted)' }}>
-              Dengan masuk, Anda menyetujui Kebijakan Privasi kami.
+            <button 
+              onClick={() => login()}
+              style={{ 
+                width: '100%',
+                padding: '14px',
+                background: 'white',
+                color: '#333',
+                border: 'none',
+                borderRadius: '50px',
+                fontWeight: 700,
+                fontSize: '16px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                boxShadow: '0 10px 20px rgba(0,0,0,0.2)',
+                transition: 'transform 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="24" alt="G" />
+              Masuk dengan Google
+            </button>
+
+            <p style={{ marginTop: '24px', fontSize: '12px', color: 'var(--muted)' }}>
+              Selalu meminta pilihan akun untuk keamanan ekstra.
             </p>
           </div>
         </div>
@@ -71,27 +108,27 @@ export default function Auth({ onSuccess, error }: AuthProps) {
       {/* Info Section for Google Verification */}
       <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 20px 100px' }}>
         <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-          <h2 style={{ fontSize: '32px', fontWeight: 900, marginBottom: '12px' }}>Kenapa Memilih Kami?</h2>
+          <h2 style={{ fontSize: '32px', fontWeight: 900, marginBottom: '12px' }}>Fitur Utama</h2>
           <div style={{ width: '60px', height: '4px', background: 'var(--p)', margin: '0 auto', borderRadius: '2px' }}></div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '32px' }}>
           <div className="card" style={{ padding: '32px' }}>
             <div style={{ color: 'var(--p)', marginBottom: '20px' }}><MapPin size={32}/></div>
-            <h3 style={{ marginBottom: '12px', fontWeight: 800 }}>Geofencing Presisi</h3>
-            <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: '1.6' }}>Verifikasi lokasi real-time memastikan karyawan melakukan absen tepat di area kantor yang telah ditentukan.</p>
+            <h3 style={{ marginBottom: '12px', fontWeight: 800 }}>GPS Verifikasi</h3>
+            <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: '1.6' }}>Memastikan kehadiran hanya bisa dilakukan di area kantor yang ditentukan.</p>
           </div>
           
           <div className="card" style={{ padding: '32px' }}>
             <div style={{ color: 'var(--p)', marginBottom: '20px' }}><QrCode size={32}/></div>
-            <h3 style={{ marginBottom: '12px', fontWeight: 800 }}>Dual Scan System</h3>
-            <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: '1.6' }}>Mendukung pemindaian langsung lewat kamera maupun unggah gambar QR Code secara manual dari galeri.</p>
+            <h3 style={{ marginBottom: '12px', fontWeight: 800 }}>QR Code System</h3>
+            <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: '1.6' }}>Sistem scan yang cepat dan akurat untuk meminimalisir kecurangan.</p>
           </div>
 
           <div className="card" style={{ padding: '32px' }}>
             <div style={{ color: 'var(--p)', marginBottom: '20px' }}><ShieldCheck size={32}/></div>
-            <h3 style={{ marginBottom: '12px', fontWeight: 800 }}>Keamanan Data</h3>
-            <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: '1.6' }}>Integrasi Google OAuth menjamin keamanan akun dan enkripsi data absensi yang tidak dapat dimanipulasi.</p>
+            <h3 style={{ marginBottom: '12px', fontWeight: 800 }}>Data Terenkripsi</h3>
+            <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: '1.6' }}>Seluruh data absensi disimpan secara aman di Database Cloudflare D1.</p>
           </div>
         </div>
 
@@ -101,7 +138,7 @@ export default function Auth({ onSuccess, error }: AuthProps) {
             <a href="/terms/" style={{ color: 'var(--muted)', fontSize: '14px', textDecoration: 'none', fontWeight: 600 }}>Terms of Service</a>
           </div>
           <p style={{ fontSize: '13px', color: 'var(--muted)', opacity: 0.7 }}>
-            © 2024 PRSNSI - Absensi Online System. All rights reserved.
+            © 2024 Absensi Online - PRSNSI System.
           </p>
         </div>
       </div>
