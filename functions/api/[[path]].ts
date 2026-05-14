@@ -3,6 +3,10 @@ export const onRequest: PagesFunction<{ DB: D1Database }> = async ({ request, en
   const path = url.pathname;
   const method = request.method;
 
+  if (!env.DB) {
+    return new Response("Database binding 'DB' is missing. Please check your Cloudflare Pages settings.", { status: 500 });
+  }
+
   try {
     // --- MANAJEMEN USER ---
     if (path === '/api/users') {

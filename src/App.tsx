@@ -57,17 +57,21 @@ function App() {
   const handleLoginSuccess = async (response: any) => {
     setLoginError(null);
     const decoded: any = jwtDecode(response.credential);
-    const isSystemAdmin = decoded.email === import.meta.env.VITE_ADMIN_EMAIL;
+    const isSystemAdmin = decoded.email.toLowerCase() === import.meta.env.VITE_ADMIN_EMAIL.toLowerCase();
     
-    // Refresh users from DB first to get latest whitelist
-    const usersRes = await fetch('/api/users');
-    const existingUsers = await usersRes.json();
-    const existingUser = existingUsers.find((u: any) => u.email === decoded.email);
+    console.log("Login Attempt:", decoded.email, "Is Admin:", isSystemAdmin);
 
-    if (!existingUser && !isSystemAdmin) {
-      setLoginError("Akses Ditolak! Email Anda tidak terdaftar dalam sistem. Silakan hubungi Admin.");
-      return;
-    }
+    // Fetch latest whitelist from DB
+    try {
+      const usersRes = await fetch('/api/users');
+      if (!usersRes.ok) throw new Error("Database connection error");
+      const existingUsers = await usersRes.json();
+      const existingUser = existingUsers.find((u: any) => u.email.toLowerCase() === decoded.email.toLowerCase());
+
+      if (!existingUser && !isSystemAdmin) {
+        setLoginError("Akses Ditolak! Email (" + decoded.email + ") tidak terdaftar. Hubungi Admin.");
+        return;
+      }
 
     let userData: UserProfile;
     if (existingUser) {
