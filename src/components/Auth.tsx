@@ -76,8 +76,8 @@ export default function Auth({ onSuccess }: AuthProps) {
 
         <div style={{ marginTop: '80px', textAlign: 'center', borderTop: '1px solid var(--border)', paddingTop: '60px' }}>
           <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginBottom: '32px' }}>
-            <a href="/privacy.html" style={{ color: 'var(--muted)', fontSize: '14px', textDecoration: 'none', fontWeight: 600 }}>Privacy Policy</a>
-            <a href="/terms.html" style={{ color: 'var(--muted)', fontSize: '14px', textDecoration: 'none', fontWeight: 600 }}>Terms of Service</a>
+            <a href="/privacy" style={{ color: 'var(--muted)', fontSize: '14px', textDecoration: 'none', fontWeight: 600 }}>Privacy Policy</a>
+            <a href="/terms" style={{ color: 'var(--muted)', fontSize: '14px', textDecoration: 'none', fontWeight: 600 }}>Terms of Service</a>
           </div>
           <p style={{ fontSize: '13px', color: 'var(--muted)', opacity: 0.7 }}>
             © 2024 PRSNSI - Absensi Online System. All rights reserved.
