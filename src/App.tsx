@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
-import { LayoutDashboard, MapPin, QrCode, Key, Eye, User as UserIcon, ShieldCheck, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, MapPin, QrCode, User as UserIcon, ShieldCheck, LogOut, Menu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Auth from './components/Auth';
 import Dashboard from './components/Dashboard';
@@ -32,11 +32,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isWithinRange, setIsWithinRange] = useState(false);
   const [logs, setLogs] = useState<any[]>([]);
-  const [showAdminPrompt, setShowAdminPrompt] = useState(false);
-  const [secretInput, setSecretInput] = useState('');
-  const [showSecret, setShowSecret] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [currentCoords, setCurrentCoords] = useState<[number, number] | null>(null);
 
   // Global Location Tracking
   useEffect(() => {
@@ -46,9 +42,7 @@ function App() {
       (pos) => {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
-        setCurrentCoords([lat, lng]);
 
-        // Calculate Distance
         const R = 6371e3;
         const φ1 = lat * Math.PI / 180, φ2 = OFFICE_LOCATION[0] * Math.PI / 180;
         const Δφ = (OFFICE_LOCATION[0] - lat) * Math.PI / 180, Δλ = (OFFICE_LOCATION[1] - lng) * Math.PI / 180;
@@ -56,22 +50,12 @@ function App() {
         const d = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         
         setIsWithinRange(d <= GEOFENCE_RADIUS);
-        console.log(`GPS Update: ${d.toFixed(1)}m from office. Within range: ${d <= GEOFENCE_RADIUS}`);
       },
-      (err) => console.error("Geolocation Error:", err),
-      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      (err) => console.error("GPS Error:", err),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
 
     return () => navigator.geolocation.clearWatch(watchId);
-  }, [user]);
-
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem('prsnsi_user', JSON.stringify(user));
-      fetchData();
-    } else {
-      localStorage.removeItem('prsnsi_user');
-    }
   }, [user]);
 
   const fetchData = async () => {
@@ -85,9 +69,18 @@ function App() {
       setAllUsers(usersData);
       setLogs(logsData);
     } catch (err) {
-      console.error("Failed to fetch data", err);
+      console.error("Fetch Error:", err);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('prsnsi_user', JSON.stringify(user));
+      fetchData();
+    } else {
+      localStorage.removeItem('prsnsi_user');
+    }
+  }, [user]);
 
   const handleLoginSuccess = async (response: any) => {
     setLoginError(null);
@@ -118,7 +111,7 @@ function App() {
       setUser(userData);
       fetchData();
     } catch (err) {
-      setLoginError("Koneksi Database Gagal.");
+      setLoginError("Database Error.");
     }
   };
 
@@ -135,7 +128,7 @@ function App() {
 
   if (!user) {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    if (!clientId) return <div style={{ padding: '40px', textAlign: 'center' }}>VITE_GOOGLE_CLIENT_ID Missing</div>;
+    if (!clientId) return <div style={{ padding: '40px', color: 'red' }}>VITE_GOOGLE_CLIENT_ID Error</div>;
     return (
       <GoogleOAuthProvider clientId={clientId}>
         <Auth onSuccess={handleLoginSuccess} error={loginError} />
@@ -167,9 +160,9 @@ function App() {
         <div className="sidebar-footer">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
             {user.picture ? <img src={user.picture} style={{ width: '32px', height: '32px', borderRadius: '50%' }} /> : <UserIcon size={18}/>}
-            <div style={{ overflow: 'hidden' }}><p style={{ fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{user.name}</p><p style={{ fontSize: '10px', opacity: 0.6 }}>{user.role}</p></div>
+            <div style={{ overflow: 'hidden' }}><p style={{ fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{user.name}</p></div>
           </div>
-          <button onClick={handleLogout} className="nav-item" style={{ color: '#ef4444', padding: '8px 12px' }}><LogOut size={16}/> Keluar</button>
+          <button onClick={handleLogout} className="nav-item" style={{ color: '#ef4444', padding: '10px 12px', border: '1px solid rgba(239, 68, 68, 0.2)' }}><LogOut size={16}/> Keluar</button>
         </div>
       </aside>
 
@@ -196,7 +189,7 @@ function App() {
               )}
               {activeTab === 'map' && (
                 <div className="card">
-                  <h2 style={{ marginBottom: '24px', fontWeight: 900 }}>Radar Lokasi (Radius 100m)</h2>
+                  <h2 style={{ marginBottom: '24px', fontWeight: 900 }}>Radar Lokasi</h2>
                   <PresenceMap onLocationUpdate={() => {}} officeLocation={OFFICE_LOCATION} geofenceRadius={GEOFENCE_RADIUS} />
                 </div>
               )}
@@ -217,7 +210,7 @@ function App() {
                   <div className="grid-2">
                     <QRGenerator />
                     <div className="card">
-                      <h3 style={{ fontWeight: 900, marginBottom: '20px' }}>Daftarkan Karyawan</h3>
+                      <h3 style={{ fontWeight: 900, marginBottom: '20px' }}>Tambah Karyawan</h3>
                       <form onSubmit={async (e) => {
                         e.preventDefault();
                         const newUser: any = { email: newUserEmail, name: newUserName, role: 'karyawan' };
@@ -233,7 +226,7 @@ function App() {
                     </div>
                   </div>
                   <div className="card">
-                    <h3 style={{ fontWeight: 900, marginBottom: '20px' }}>Manajemen Karyawan</h3>
+                    <h3 style={{ fontWeight: 900, marginBottom: '20px' }}>Daftar Karyawan</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       {allUsers.map(u => (
                         <div key={u.email} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', borderBottom: '1px solid var(--border)' }}>
