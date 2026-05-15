@@ -4,10 +4,11 @@ import { motion } from 'framer-motion';
 
 interface AuthProps {
   onSuccess: (response: any) => void;
+  onDemoLogin?: () => void;
   error?: string | null;
 }
 
-export default function Auth({ onSuccess, error }: AuthProps) {
+export default function Auth({ onSuccess, onDemoLogin, error }: AuthProps) {
   const login = useGoogleLogin({
     onSuccess: (tokenResponse) => {
       // Kita perlu mengambil data user menggunakan access_token karena useGoogleLogin
@@ -88,9 +89,25 @@ export default function Auth({ onSuccess, error }: AuthProps) {
               <span style={{ fontWeight: 800 }}>Masuk dengan Google</span>
             </button>
 
-            <p style={{ marginTop: '24px', fontSize: '11px', color: 'var(--muted)' }}>
+            <p style={{ marginTop: '24px', fontSize: '11px', color: 'var(--muted)', marginBottom: '16px' }}>
               Aman & Selalu Verifikasi Akun.
             </p>
+
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
+              <button 
+                onClick={() => onDemoLogin?.()}
+                className="btn"
+                style={{ 
+                  width: '100%',
+                  background: 'rgba(255,255,255,0.05)',
+                  color: 'var(--p)',
+                  border: '1px solid var(--p)',
+                  fontSize: '14px'
+                }}
+              >
+                🚀 Coba Mode Demo (Tamu)
+              </button>
+            </div>
           </div>
         </div>
       </div>

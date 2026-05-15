@@ -179,6 +179,18 @@ function App() {
     }
   };
 
+  const handleDemoLogin = () => {
+    const guestUser: UserProfile = {
+      email: 'guest@demo.com',
+      name: 'Tamu Demo (Publik)',
+      picture: 'https://ui-avatars.com/api/?name=Guest&background=6366f1&color=fff',
+      role: 'karyawan',
+      joinedAt: new Date().toISOString()
+    };
+    setUser(guestUser);
+    setLoginError(null);
+  };
+
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('prsnsi_user');
@@ -195,7 +207,11 @@ function App() {
     if (!clientId) return <div style={{ padding: '40px', color: 'red' }}>VITE_GOOGLE_CLIENT_ID Error</div>;
     return (
       <GoogleOAuthProvider clientId={clientId}>
-        <Auth onSuccess={handleLoginSuccess} error={loginError} />
+        <Auth 
+          onSuccess={handleLoginSuccess} 
+          onDemoLogin={handleDemoLogin}
+          error={loginError} 
+        />
       </GoogleOAuthProvider>
     );
   }
