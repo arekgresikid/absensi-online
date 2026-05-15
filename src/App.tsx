@@ -157,7 +157,7 @@ function App() {
       const existingUser = existingUsers.find((u: any) => u.email.toLowerCase() === decoded.email.toLowerCase());
 
       if (!existingUser && !isSystemAdmin) {
-        setLoginError(`Akses Ditolak! Email (${decoded.email}) belum terdaftar.`);
+        setLoginError(`Akses Ditolak! Email (${decoded.email}) belum terdaftar. Silakan hubungi Admin via email: admin@ariftirtana.my.id atau WhatsApp: 081 330 763 633 untuk pendaftaran.`);
         return;
       }
 
