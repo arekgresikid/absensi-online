@@ -164,10 +164,10 @@ export default function Dashboard({
           <div className="stack-v" style={{ gap: '20px' }}>
             <div>
               <p style={{ fontWeight: 800, fontSize: '16px', margin: 0 }}>Kantor Utama</p>
-              <p className="text-muted" style={{ marginTop: '4px', fontSize: '13px' }}>Jalan Dr. Sutomo GG XIV, Gresik, Jawa Timur</p>
+              <p className="text-muted" style={{ marginTop: '4px', fontSize: '13px' }}>Jalan Dr. Sutomo GG XIV, Gresik, Jawa Timur, Indonesia</p>
             </div>
             <div style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', height: '180px' }}>
-              <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=600" style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Office" />
+              <img src="/office_banner.png" style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Office" />
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(3,7,18,0.6), transparent)' }} />
             </div>
           </div>
