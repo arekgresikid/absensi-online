@@ -1,4 +1,4 @@
-INSERT INTO locations (id, name, latitude, longitude) VALUES 
+INSERT OR IGNORE INTO locations (id, name, latitude, longitude) VALUES 
 ('sub01', 'Surabaya - Tunjungan Plaza', -7.2619, 112.7392),
 ('sub02', 'Surabaya - Wonokromo', -7.3005, 112.7371),
 ('sub03', 'Surabaya - Gubeng', -7.2668, 112.7519),
@@ -29,4 +29,64 @@ INSERT INTO locations (id, name, latitude, longitude) VALUES
 ('bgr02', 'Bogor - Stasiun', -6.5945, 106.7905),
 ('bgr03', 'Bogor - Baranangsiang', -6.6055, 106.8085),
 ('bgr04', 'Bogor - Cibinong', -6.4815, 106.8525),
-('bgr05', 'Bogor - Ciawi', -6.6575, 106.8555);
+('bgr05', 'Bogor - Ciawi', -6.6575, 106.8555),
+
+-- SEMARANG (Tambah 15)
+('smg02', 'Semarang - Tembalang (UNDIP)', -7.0524, 110.4385),
+('smg03', 'Semarang - Pelabuhan Tanjung Emas', -6.9458, 110.4262),
+('smg04', 'Semarang - Kawasan Industri Candi', -6.9952, 110.3541),
+('smg05', 'Semarang - Tugu Muda', -6.9841, 110.4093),
+('smg06', 'Semarang - Kota Lama', -6.9681, 110.4278),
+('smg07', 'Semarang - Jatingaleh', -7.0268, 110.4194),
+('smg08', 'Semarang - Pedurungan', -7.0051, 110.4718),
+('smg09', 'Semarang - Ngaliyan', -7.0025, 110.3421),
+('smg10', 'Semarang - Mangkang', -6.9642, 110.3012),
+('smg11', 'Semarang - Genuk', -6.9532, 110.4821),
+('smg12', 'Semarang - Sampangan', -7.0142, 110.3921),
+('smg13', 'Semarang - Banyumanik', -7.0652, 110.4212),
+('smg14', 'Semarang - UNNES', -7.0482, 110.3921),
+('smg15', 'Semarang - Bandara Ahmad Yani', -6.9742, 110.3721),
+('smg16', 'Semarang - RS Kariadi', -6.9942, 110.4071),
+
+-- SOLO / SURAKARTA (10)
+('slo01', 'Solo - Stasiun Balapan', -7.5582, 110.8214),
+('slo02', 'Solo - Pasar Klewer', -7.5768, 110.8262),
+('slo03', 'Solo - Manahan', -7.5524, 110.8012),
+('slo04', 'Solo - Slamet Riyadi', -7.5682, 110.8121),
+('slo05', 'Solo Baru', -7.6012, 110.8121),
+('slo06', 'Solo - Jebres', -7.5612, 110.8421),
+('slo07', 'Solo - Kartasura', -7.5512, 110.7421),
+('slo08', 'Solo - Palur', -7.5612, 110.8821),
+('slo09', 'Solo - UNS', -7.5582, 110.8562),
+('slo10', 'Solo - Gading', -7.5842, 110.8271),
+
+-- CIREBON (10)
+('crb01', 'Cirebon - Alun-alun Kejaksan', -6.7152, 108.5574),
+('crb02', 'Cirebon - Grage Mall', -6.7212, 108.5512),
+('crb03', 'Cirebon - Pelabuhan', -6.7182, 108.5712),
+('crb04', 'Cirebon - Terminal Harjamukti', -6.7512, 108.5412),
+('crb05', 'Cirebon - Sumber (Pemkab)', -6.7612, 108.4812),
+('crb06', 'Cirebon - Kedawung', -6.7182, 108.5212),
+('crb07', 'Cirebon - Plered', -6.7082, 108.5012),
+('crb08', 'Cirebon - Weru', -6.7382, 108.4912),
+('crb09', 'Cirebon - Losari', -6.8482, 108.7912),
+('crb10', 'Cirebon - Arjawinangun', -6.6582, 108.4112),
+
+-- KARAWANG (10)
+('krw01', 'Karawang - Alun-alun', -6.3052, 107.3012),
+('krw02', 'Karawang - Galuh Mas', -6.3212, 107.2912),
+('krw03', 'Karawang - Kawasan KIIC', -6.3612, 107.2712),
+('krw04', 'Karawang - Kawasan KIM', -6.3812, 107.3412),
+('krw05', 'Karawang - Cikampek', -6.4112, 107.4512),
+('krw06', 'Karawang - Telukjambe', -6.3412, 107.2912),
+('krw07', 'Karawang - Kosambi', -6.3612, 107.3812),
+('krw08', 'Karawang - Klari', -6.3512, 107.3612),
+('krw09', 'Karawang - Rengasdengklok', -6.1612, 107.2912),
+('krw10', 'Karawang - Peruri', -6.3552, 107.3112),
+
+-- JAWA TENGAH & BARAT LAINNYA (5)
+('pkal01', 'Pekalongan - Alun-alun', -6.8892, 109.6712),
+('clp01', 'Cilacap - Pusat Kota', -7.7212, 109.0112),
+('tsm01', 'Tasikmalaya - Pusat Kota', -7.3272, 108.2172),
+('bks01', 'Bekasi - Summarecon', -6.2212, 107.0012),
+('tgr01', 'Tangerang - BSD', -6.3012, 106.6612);
